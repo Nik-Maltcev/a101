@@ -200,7 +200,9 @@ class SplitService:
             texts = [text for _, text in comments_to_process]
             
             # Call LLM (it handles batching internally)
+            logger.info(f"Calling LLM split_comments with {len(texts)} texts")
             llm_results = await self.llm_client.split_comments(texts)
+            logger.info(f"LLM returned {len(llm_results)} results")
             
             # Map results back and cache them
             for i, (original_idx, comment) in enumerate(comments_to_process):

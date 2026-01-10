@@ -36,7 +36,7 @@ class LLMClient:
         api_key: Optional[str] = None,
         api_url: Optional[str] = None,
         model: Optional[str] = None,
-        timeout: float = 60.0,
+        timeout: float = 120.0,
     ):
         """
         Initialize LLM client.
@@ -53,6 +53,13 @@ class LLMClient:
         self.timeout = timeout
         
         self._client: Optional[httpx.AsyncClient] = None
+        
+        # Validate API key
+        if not self.api_key or not self.api_key.strip():
+            raise LLMClientError(
+                "LLM_API_KEY is not configured. "
+                "Please set the LLM_API_KEY environment variable."
+            )
     
     async def _get_client(self) -> httpx.AsyncClient:
         """Get or create HTTP client."""
@@ -97,10 +104,15 @@ class LLMClient:
         payload["response_format"] = {"type": "json_object"}
         
         try:
+            logger.info(f"Sending request to LLM API: {self.api_url}/chat/completions")
+            logger.debug(f"Payload model: {payload.get('model')}, messages count: {len(messages)}")
+            
             response = await client.post(
                 f"{self.api_url}/chat/completions",
                 json=payload,
             )
+            
+            logger.info(f"LLM API response status: {response.status_code}")
             response.raise_for_status()
             
             data = response.json()
@@ -313,15 +325,20 @@ class LLMClient:
         
         batch_size = settings.SPLIT_BATCH_SIZE
         all_results: list[SplitResult] = []
+        total_batches = (len(comments) + batch_size - 1) // batch_size
         
         for i in range(0, len(comments), batch_size):
             batch = comments[i:i + batch_size]
-            logger.info(f"Processing split batch {i // batch_size + 1}, size: {len(batch)}")
+            batch_num = i // batch_size + 1
+            logger.info(f"Processing split batch {batch_num}/{total_batches}, size: {len(batch)}")
             
             messages = self._build_split_prompt(batch)
+            logger.info(f"Calling LLM API for batch {batch_num}...")
             response = await self._call_api(messages)
+            logger.info(f"Batch {batch_num} response received, parsing...")
             batch_results = self._parse_split_response(response, len(batch))
             all_results.extend(batch_results)
+            logger.info(f"Batch {batch_num} complete")
         
         return all_results
 
