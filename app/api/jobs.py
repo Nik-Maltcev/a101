@@ -1,36 +1,26 @@
 """API endpoints for job management."""
 
+import asyncio
 import uuid
 from datetime import datetime
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Optional
 
-import redis
-from fastapi import APIRouter, File, HTTPException, UploadFile
+from fastapi import APIRouter, BackgroundTasks, File, HTTPException, UploadFile
 from fastapi.responses import FileResponse
 
 from app.config import settings
 from app.models import Job, JobResponse, JobStatus, JobStatusResponse
-from app.worker.tasks import process_job
 
 router = APIRouter(prefix="/jobs", tags=["jobs"])
 
-# Redis client for job storage
-_redis_client = None
-
-
-def get_redis_client() -> redis.Redis:
-    """Get or create Redis client."""
-    global _redis_client
-    if _redis_client is None:
-        _redis_client = redis.from_url(settings.REDIS_URL, decode_responses=True)
-    return _redis_client
+# In-memory job storage (for simple deployment without Redis)
+_jobs_storage: Dict[str, dict] = {}
 
 
 def get_job(job_id: str) -> Job | None:
-    """Get job from Redis storage."""
-    r = get_redis_client()
-    job_data = r.hgetall(f"job:{job_id}")
+    """Get job from storage."""
+    job_data = _jobs_storage.get(job_id)
     if not job_data:
         return None
     return Job(
@@ -46,8 +36,7 @@ def get_job(job_id: str) -> Job | None:
 
 
 def save_job(job: Job) -> None:
-    """Save job to Redis storage."""
-    r = get_redis_client()
+    """Save job to storage."""
     job_data = {
         "id": job.id,
         "status": job.status.value,
@@ -58,30 +47,154 @@ def save_job(job: Job) -> None:
         "created_at": job.created_at.isoformat(),
         "updated_at": job.updated_at.isoformat(),
     }
-    r.hset(f"job:{job.id}", mapping=job_data)
-    # Set expiration to 24 hours
-    r.expire(f"job:{job.id}", 86400)
+    _jobs_storage[job.id] = job_data
+
+
+def update_job_status(
+    job_id: str,
+    status: JobStatus,
+    progress: int = 0,
+    output_file: Optional[str] = None,
+    error: Optional[str] = None,
+) -> None:
+    """Update job status in storage."""
+    if job_id not in _jobs_storage:
+        return
+    
+    _jobs_storage[job_id]["status"] = status.value
+    _jobs_storage[job_id]["progress"] = str(progress)
+    _jobs_storage[job_id]["updated_at"] = datetime.utcnow().isoformat()
+    
+    if output_file is not None:
+        _jobs_storage[job_id]["output_file"] = output_file
+    if error is not None:
+        _jobs_storage[job_id]["error"] = error
+
+
+async def process_job_async(job_id: str, file_path: str) -> None:
+    """
+    Process job asynchronously.
+    
+    Steps:
+    1. Read xlsx file via ExcelReader
+    2. Split comments into defects via SplitService (LLM)
+    3. Expand rows (one row per defect)
+    4. Classify defects via ClassifyService (LLM)
+    5. Write result file via ExcelWriter
+    """
+    import logging
+    from app.services.excel_reader import ExcelReader, ExcelReaderError
+    from app.services.split_service import SplitService
+    from app.services.expand_service import expand_rows, COMMENT_COLUMN_NAME
+    from app.services.classify_service import ClassifyService
+    from app.services.excel_writer import ExcelWriter, get_output_path
+    from app.services.category_index import CategoryIndex
+    from app.services.llm_client import LLMClient
+    
+    logger = logging.getLogger(__name__)
+    llm_client = None
+    
+    try:
+        # Initialize services
+        llm_client = LLMClient()
+        category_index = CategoryIndex(settings.CATEGORIES_FILE)
+        category_index.build_index()
+        
+        split_service = SplitService(llm_client)
+        classify_service = ClassifyService(llm_client, category_index)
+        excel_reader = ExcelReader()
+        excel_writer = ExcelWriter()
+        
+        # Step 1: Read xlsx file
+        logger.info(f"Job {job_id}: Reading file {file_path}")
+        update_job_status(job_id, JobStatus.PENDING, progress=5)
+        
+        rows = excel_reader.read_file(file_path)
+        total_rows = len(rows)
+        logger.info(f"Job {job_id}: Read {total_rows} rows")
+        
+        if total_rows == 0:
+            output_path = get_output_path(job_id, settings.RESULTS_DIR)
+            excel_writer.write_result([], str(output_path))
+            update_job_status(job_id, JobStatus.COMPLETED, progress=100, output_file=str(output_path))
+            return
+        
+        # Extract comments
+        comments = [row.get(COMMENT_COLUMN_NAME, "") or "" for row in rows]
+        
+        # Step 2: Split comments
+        logger.info(f"Job {job_id}: Splitting {len(comments)} comments")
+        update_job_status(job_id, JobStatus.SPLITTING, progress=10)
+        
+        defects_per_row = await split_service.split_batch(comments)
+        total_defects = sum(len(d) for d in defects_per_row)
+        logger.info(f"Job {job_id}: Found {total_defects} defects")
+        
+        update_job_status(job_id, JobStatus.SPLITTING, progress=40)
+        
+        # Step 3: Expand rows
+        logger.info(f"Job {job_id}: Expanding rows")
+        expanded_rows = expand_rows(rows, defects_per_row)
+        logger.info(f"Job {job_id}: Expanded to {len(expanded_rows)} rows")
+        
+        update_job_status(job_id, JobStatus.CLASSIFYING, progress=50)
+        
+        # Step 4: Classify defects
+        if expanded_rows:
+            logger.info(f"Job {job_id}: Classifying {len(expanded_rows)} defects")
+            defect_texts = [row.defect_text for row in expanded_rows]
+            categories = await classify_service.classify_batch(defect_texts)
+            
+            for i, category in enumerate(categories):
+                expanded_rows[i].category = category
+            
+            logger.info(f"Job {job_id}: Classification complete")
+        
+        update_job_status(job_id, JobStatus.CLASSIFYING, progress=90)
+        
+        # Step 5: Write result
+        logger.info(f"Job {job_id}: Writing result file")
+        output_path = get_output_path(job_id, settings.RESULTS_DIR)
+        original_headers = list(rows[0].keys()) if rows else None
+        
+        excel_writer.write_result(expanded_rows, str(output_path), original_headers=original_headers)
+        
+        logger.info(f"Job {job_id}: Result saved to {output_path}")
+        update_job_status(job_id, JobStatus.COMPLETED, progress=100, output_file=str(output_path))
+        
+    except ExcelReaderError as e:
+        logger.error(f"Job {job_id}: Excel read error - {e}")
+        update_job_status(job_id, JobStatus.FAILED, error=f"Failed to read file: {e}")
+    except Exception as e:
+        logger.error(f"Job {job_id}: Processing error - {e}", exc_info=True)
+        update_job_status(job_id, JobStatus.FAILED, error=f"Processing failed: {e}")
+    finally:
+        if llm_client is not None:
+            await llm_client.close()
+
+
+def run_process_job(job_id: str, file_path: str):
+    """Run async job processing in background."""
+    asyncio.run(process_job_async(job_id, file_path))
 
 
 @router.post("", response_model=JobResponse)
-async def create_job(file: UploadFile = File(...)) -> JobResponse:
+async def create_job(
+    background_tasks: BackgroundTasks,
+    file: UploadFile = File(...),
+) -> JobResponse:
     """
     Upload an Excel file for processing.
     
-    Accepts only .xlsx files. Creates a job in the queue and returns job_id.
-    
-    Requirements: 1.1, 1.2, 1.3, 1.4, 1.5
+    Accepts only .xlsx files. Creates a job and starts processing in background.
     """
-    # Validate file format (Requirement 1.1)
+    # Validate file format
     if not file.filename:
         raise HTTPException(status_code=400, detail="No filename provided")
     
     file_ext = Path(file.filename).suffix.lower()
     if file_ext not in settings.ALLOWED_EXTENSIONS:
-        raise HTTPException(
-            status_code=400,
-            detail="Only .xlsx files are accepted"
-        )
+        raise HTTPException(status_code=400, detail="Only .xlsx files are accepted")
     
     # Check file size
     content = await file.read()
@@ -91,10 +204,10 @@ async def create_job(file: UploadFile = File(...)) -> JobResponse:
             detail=f"File size exceeds limit of {settings.MAX_FILE_SIZE // (1024*1024)} MB"
         )
     
-    # Generate unique job_id (Requirement 1.2)
+    # Generate unique job_id
     job_id = str(uuid.uuid4())
     
-    # Save file to uploads/ (Requirement 1.3)
+    # Save file
     file_path = settings.UPLOADS_DIR / f"{job_id}.xlsx"
     with open(file_path, "wb") as f:
         f.write(content)
@@ -113,8 +226,8 @@ async def create_job(file: UploadFile = File(...)) -> JobResponse:
     )
     save_job(job)
     
-    # Create task in queue (Requirement 1.5)
-    process_job.delay(job_id, str(file_path))
+    # Start processing in background
+    background_tasks.add_task(run_process_job, job_id, str(file_path))
     
     return JobResponse(job_id=job_id)
 
