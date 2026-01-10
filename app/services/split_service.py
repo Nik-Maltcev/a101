@@ -31,9 +31,9 @@ class SplitService:
     # Patterns that indicate no defects
     NO_DEFECTS_PATTERNS = [
         r"^\s*$",  # Empty or whitespace only
-        r"(?i)нет\s+замечаний",  # "нет замечаний" case-insensitive
-        r"(?i)без\s+замечаний",  # "без замечаний" case-insensitive
-        r"(?i)замечания\s+отсутствуют",  # "замечания отсутствуют"
+        r"нет\s+замечаний",  # "нет замечаний"
+        r"без\s+замечаний",  # "без замечаний"
+        r"замечания\s+отсутствуют",  # "замечания отсутствуют"
     ]
     
     def __init__(
@@ -54,9 +54,10 @@ class SplitService:
         self._cache = cache if cache is not None else {}
         self.batch_size = batch_size or settings.SPLIT_BATCH_SIZE
         
-        # Compile patterns for efficiency
+        # Compile patterns for efficiency (case-insensitive)
         self._no_defects_regex = re.compile(
-            "|".join(self.NO_DEFECTS_PATTERNS)
+            "|".join(self.NO_DEFECTS_PATTERNS),
+            re.IGNORECASE
         )
     
     @staticmethod
