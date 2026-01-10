@@ -119,8 +119,14 @@ async def process_job_async(job_id: str, file_path: str) -> None:
             update_job_status(job_id, JobStatus.COMPLETED, progress=100, output_file=str(output_path))
             return
         
-        # Extract comments
-        comments = [row.get(COMMENT_COLUMN_NAME, "") or "" for row in rows]
+        # Extract comments (case-insensitive column lookup)
+        def get_comment(row: dict) -> str:
+            for key in row.keys():
+                if key.upper() == COMMENT_COLUMN_NAME.upper():
+                    return row.get(key, "") or ""
+            return ""
+        
+        comments = [get_comment(row) for row in rows]
         
         # Step 2: Split comments
         logger.info(f"Job {job_id}: Splitting {len(comments)} comments")

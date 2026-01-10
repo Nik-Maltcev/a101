@@ -57,13 +57,21 @@ def expand_rows(
         if not defects:
             continue
         
+        # Find actual comment column name (case-insensitive)
+        actual_comment_col = None
+        for key in row.keys():
+            if key.upper() == comment_column.upper():
+                actual_comment_col = key
+                break
+        
         # Create one expanded row per defect
         for defect_text in defects:
             # Copy all original columns
             original_data = row.copy()
             
             # Replace comment column with defect text
-            original_data[comment_column] = defect_text
+            if actual_comment_col:
+                original_data[actual_comment_col] = defect_text
             
             expanded_row = ExpandedRow(
                 original_data=original_data,

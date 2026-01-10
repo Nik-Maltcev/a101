@@ -93,8 +93,10 @@ class ExcelReader:
             return None
         
         for idx, cell_value in enumerate(first_row):
-            if cell_value is not None and str(cell_value).strip() == self.COMMENT_COLUMN_NAME:
-                return idx
+            if cell_value is not None:
+                # Case-insensitive comparison
+                if str(cell_value).strip().upper() == self.COMMENT_COLUMN_NAME.upper():
+                    return idx
         
         return None
     
