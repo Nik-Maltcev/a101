@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Defect Classifier</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #666;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .upload-area {
+            border: 2px dashed #ddd;
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .upload-area:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .upload-area.dragover {
+            border-color: #667eea;
+            background: #f0f3ff;
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .upload-text {
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .upload-hint {
+            color: #999;
+            font-size: 12px;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .file-info {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .file-info.visible {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .file-icon {
+            font-size: 24px;
+        }
+
+        .file-name {
+            flex: 1;
+            color: #333;
+            font-weight: 500;
+            word-break: break-all;
+        }
+
+        .remove-file {
+            background: none;
+            border: none;
+            color: #999;
+            cursor: pointer;
+            font-size: 20px;
+            padding: 5px;
+        }
+
+        .remove-file:hover {
+            color: #e74c3c;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(17, 153, 142, 0.4);
+        }
+
+        .progress-section {
+            display: none;
+            margin-top: 30px;
+        }
+
+        .progress-section.visible {
+            display: block;
+        }
+
+        .status-text {
+            text-align: center;
+            color: #333;
+            font-weight: 500;
+            margin-bottom: 15px;
+        }
+
+        .status-icon {
+            margin-right: 8px;
+        }
+
+        .progress-bar-container {
+            background: #e9ecef;
+            border-radius: 10px;
+            height: 20px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+            width: 0%;
+        }
+
+        .progress-percent {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .error-message {
+            background: #fee;
+            border: 1px solid #fcc;
+            border-radius: 8px;
+            padding: 15px;
+            color: #c00;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .error-message.visible {
+            display: block;
+        }
+
+        .download-section {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .download-section.visible {
+            display: block;
+        }
+
+        .success-message {
+            background: #e8f5e9;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .success-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        .success-text {
+            color: #2e7d32;
+            font-weight: 500;
+        }
+
+        .new-upload-link {
+            display: block;
+            text-align: center;
+            margin-top: 15px;
+            color: #667eea;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .new-upload-link:hover {
+            text-decoration: underline;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .spinner {
+            display: inline-block;
+            animation: spin 1s linear infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Defect Classifier</h1>
+        <p class="subtitle">Автоматическая классификация дефектов из Excel-файлов</p>
+
+        <!-- Upload Section -->
+        <div id="uploadSection">
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">📁</div>
+                <div class="upload-text">Перетащите файл сюда или нажмите для выбора</div>
+                <div class="upload-hint">Поддерживаются только файлы .xlsx</div>
+            </div>
+            <input type="file" id="fileInput" accept=".xlsx">
+
+            <div class="file-info" id="fileInfo">
+                <span class="file-icon">📄</span>
+                <span class="file-name" id="fileName"></span>
+                <button class="remove-file" id="removeFile" title="Удалить файл">×</button>
+            </div>
+
+            <button class="btn btn-primary" id="uploadBtn" disabled>
+                Загрузить и обработать
+            </button>
+        </div>
+
+        <!-- Progress Section -->
+        <div class="progress-section" id="progressSection">
+            <div class="status-text" id="statusText">
+                <span class="status-icon spinner">⏳</span>
+                <span id="statusMessage">Загрузка файла...</span>
+            </div>
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <div class="progress-percent" id="progressPercent">0%</div>
+        </div>
+
+        <!-- Error Message -->
+        <div class="error-message" id="errorMessage"></div>
+
+        <!-- Download Section -->
+        <div class="download-section" id="downloadSection">
+            <div class="success-message">
+                <div class="success-icon">✅</div>
+                <div class="success-text">Обработка завершена!</div>
+            </div>
+            <button class="btn btn-success" id="downloadBtn">
+                📥 Скачать результат
+            </button>
+            <a href="#" class="new-upload-link" id="newUploadLink">Загрузить другой файл</a>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileName = document.getElementById('fileName');
+        const removeFile = document.getElementById('removeFile');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const uploadSection = document.getElementById('uploadSection');
+        const progressSection = document.getElementById('progressSection');
+        const statusMessage = document.getElementById('statusMessage');
+        const progressBar = document.getElementById('progressBar');
+        const progressPercent = document.getElementById('progressPercent');
+        const errorMessage = document.getElementById('errorMessage');
+        const downloadSection = document.getElementById('downloadSection');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const newUploadLink = document.getElementById('newUploadLink');
+
+        let selectedFile = null;
+        let currentJobId = null;
+        let pollInterval = null;
+
+        // Status messages in Russian
+        const statusMessages = {
+            'pending': 'Ожидание в очереди...',
+            'splitting': 'Разделяю комментарии на дефекты...',
+            'classifying': 'Проставляю категории дефектов...',
+            'completed': 'Обработка завершена!',
+            'failed': 'Ошибка обработки'
+        };
+
+        // Drag and drop handlers
+        uploadArea.addEventListener('click', () => fileInput.click());
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFileSelect(files[0]);
+            }
+        });
+
+        // File input change handler
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFileSelect(e.target.files[0]);
+            }
+        });
+
+        // Handle file selection
+        function handleFileSelect(file) {
+            if (!file.name.toLowerCase().endsWith('.xlsx')) {
+                showError('Поддерживаются только файлы формата .xlsx');
+                return;
+            }
+
+            selectedFile = file;
+            fileName.textContent = file.name;
+            fileInfo.classList.add('visible');
+            uploadBtn.disabled = false;
+            hideError();
+        }
+
+        // Remove file handler
+        removeFile.addEventListener('click', () => {
+            selectedFile = null;
+            fileInput.value = '';
+            fileInfo.classList.remove('visible');
+            uploadBtn.disabled = true;
+        });
+
+        // Upload button handler
+        uploadBtn.addEventListener('click', async () => {
+            if (!selectedFile) return;
+
+            uploadBtn.disabled = true;
+            hideError();
+            showProgress();
+
+            try {
+                const formData = new FormData();
+                formData.append('file', selectedFile);
+
+                const response = await fetch('/jobs', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Ошибка загрузки файла');
+                }
+
+                const data = await response.json();
+                currentJobId = data.job_id;
+
+                // Start polling for status
+                startPolling();
+
+            } catch (error) {
+                showError(error.message);
+                hideProgress();
+                uploadBtn.disabled = false;
+            }
+        });
+
+        // Start polling for job status
+        function startPolling() {
+            pollInterval = setInterval(checkJobStatus, 1500);
+            checkJobStatus(); // Check immediately
+        }
+
+        // Stop polling
+        function stopPolling() {
+            if (pollInterval) {
+                clearInterval(pollInterval);
+                pollInterval = null;
+            }
+        }
+
+        // Check job status
+        async function checkJobStatus() {
+            if (!currentJobId) return;
+
+            try {
+                const response = await fetch(`/jobs/${currentJobId}`);
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Ошибка получения статуса');
+                }
+
+                const data = await response.json();
+                updateProgress(data);
+
+                if (data.status === 'completed') {
+                    stopPolling();
+                    showDownload(data.download_url);
+                } else if (data.status === 'failed') {
+                    stopPolling();
+                    showError(data.error || 'Произошла ошибка при обработке файла');
+                    hideProgress();
+                }
+
+            } catch (error) {
+                stopPolling();
+                showError(error.message);
+                hideProgress();
+            }
+        }
+
+        // Update progress display
+        function updateProgress(data) {
+            const message = statusMessages[data.status] || data.status;
+            statusMessage.textContent = message;
+            progressBar.style.width = `${data.progress}%`;
+            progressPercent.textContent = `${data.progress}%`;
+        }
+
+        // Show progress section
+        function showProgress() {
+            uploadSection.style.display = 'none';
+            progressSection.classList.add('visible');
+            downloadSection.classList.remove('visible');
+        }
+
+        // Hide progress section
+        function hideProgress() {
+            progressSection.classList.remove('visible');
+            uploadSection.style.display = 'block';
+        }
+
+        // Show download section
+        function showDownload(downloadUrl) {
+            progressSection.classList.remove('visible');
+            downloadSection.classList.add('visible');
+            
+            downloadBtn.onclick = () => {
+                window.location.href = downloadUrl;
+            };
+        }
+
+        // Show error message
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.classList.add('visible');
+        }
+
+        // Hide error message
+        function hideError() {
+            errorMessage.classList.remove('visible');
+        }
+
+        // New upload link handler
+        newUploadLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            resetUI();
+        });
+
+        // Reset UI to initial state
+        function resetUI() {
+            selectedFile = null;
+            currentJobId = null;
+            fileInput.value = '';
+            fileInfo.classList.remove('visible');
+            uploadBtn.disabled = true;
+            uploadSection.style.display = 'block';
+            progressSection.classList.remove('visible');
+            downloadSection.classList.remove('visible');
+            hideError();
+            progressBar.style.width = '0%';
+            progressPercent.textContent = '0%';
+        }
+    </script>
+</body>
+</html>
