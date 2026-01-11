@@ -125,7 +125,7 @@ class ClassifyService:
             Category string
         """
         if not defect or not defect.strip():
-            return "Неизвестно"
+            return "НЕ ОПРЕДЕЛЕНО"
         
         # Check cache
         cached = self._get_from_cache(defect)
@@ -135,7 +135,7 @@ class ClassifyService:
         
         # Process via batch (single item)
         results = await self.classify_batch([defect])
-        return results[0] if results else "Неизвестно"
+        return results[0] if results else "НЕ ОПРЕДЕЛЕНО"
     
     async def classify_batch(self, defects: list[str]) -> list[str]:
         """
@@ -159,7 +159,7 @@ class ClassifyService:
         for i, defect in enumerate(defects):
             # Handle empty defects
             if not defect or not defect.strip():
-                results[i] = "Неизвестно"
+                results[i] = "НЕ ОПРЕДЕЛЕНО"
                 continue
             
             # Check cache
@@ -195,28 +195,19 @@ class ClassifyService:
                     classify_result = llm_results[i]
                     category = classify_result.chosen
                     
+                    # Allow "НЕ ОПРЕДЕЛЕНО" as valid response
+                    if category == "НЕ ОПРЕДЕЛЕНО":
+                        logger.info(f"Defect {original_idx}: LLM could not determine category")
                     # Validate that category is from the candidates list
-                    candidates = defects_with_candidates[i]["candidates"]
-                    if category not in candidates:
+                    elif category not in defects_with_candidates[i]["candidates"]:
                         logger.warning(
                             f"LLM returned invalid category '{category}' for defect {original_idx}. "
-                            f"Selecting closest match from candidates."
+                            f"Setting to 'НЕ ОПРЕДЕЛЕНО'."
                         )
-                        # Find closest match from candidates
-                        from rapidfuzz import process as rfprocess, fuzz as rffuzz
-                        best_match = rfprocess.extractOne(
-                            category, 
-                            candidates, 
-                            scorer=rffuzz.ratio
-                        )
-                        if best_match:
-                            category = best_match[0]
-                            logger.info(f"Selected closest match: '{category}'")
-                        else:
-                            category = candidates[0] if candidates else "Неизвестно"
+                        category = "НЕ ОПРЕДЕЛЕНО"
                 else:
                     # Fallback if LLM returned fewer results
-                    category = "Неизвестно"
+                    category = "НЕ ОПРЕДЕЛЕНО"
                     logger.warning(f"No LLM result for defect {original_idx}")
                 
                 results[original_idx] = category
