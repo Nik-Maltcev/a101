@@ -32,8 +32,8 @@ class Settings(BaseSettings):
     
     # Processing settings
     SPLIT_BATCH_SIZE: int = 30
-    CLASSIFY_BATCH_SIZE: int = 20
-    CATEGORY_TOP_N: int = 25
+    CLASSIFY_BATCH_SIZE: int = 10
+    CATEGORY_TOP_N: int = 25  # Not used anymore, keeping for compatibility
     
     # File settings
     MAX_FILE_SIZE: int = 50 * 1024 * 1024  # 50 MB

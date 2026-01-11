@@ -176,14 +176,15 @@ class ClassifyService:
         if defects_to_process:
             logger.info(f"Processing {len(defects_to_process)} defects via LLM")
             
-            # Build defects with candidates for LLM
+            # Get ALL categories for LLM
+            all_categories = self.category_index.categories
+            
+            # Build defects with ALL categories for LLM
             defects_with_candidates: list[dict] = []
             for original_idx, defect in defects_to_process:
-                # Get top-N candidate categories
-                candidates = self.category_index.find_top_n(defect, self.top_n)
                 defects_with_candidates.append({
                     "defect": defect,
-                    "candidates": candidates,
+                    "candidates": all_categories,  # Send ALL categories
                 })
             
             # Call LLM (it handles batching internally)
@@ -194,20 +195,19 @@ class ClassifyService:
                 if i < len(llm_results):
                     classify_result = llm_results[i]
                     category = classify_result.chosen
-                    candidates = defects_with_candidates[i]["candidates"]
                     
                     # If LLM returned "НЕ ОПРЕДЕЛЕНО" or invalid category, find closest match
-                    if category == "НЕ ОПРЕДЕЛЕНО" or category not in candidates:
+                    if category == "НЕ ОПРЕДЕЛЕНО" or category not in all_categories:
                         if category != "НЕ ОПРЕДЕЛЕНО":
                             logger.warning(
                                 f"LLM returned invalid category '{category}' for defect {original_idx}. "
                                 f"Finding closest match."
                             )
-                        # Find closest match from candidates
+                        # Find closest match from all categories
                         from rapidfuzz import process as rfprocess, fuzz as rffuzz
                         best_match = rfprocess.extractOne(
                             defect,  # Match against original defect text
-                            candidates, 
+                            all_categories, 
                             scorer=rffuzz.token_set_ratio
                         )
                         if best_match and best_match[1] > 30:  # Score threshold
