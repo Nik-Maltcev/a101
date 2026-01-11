@@ -194,6 +194,26 @@ class ClassifyService:
                 if i < len(llm_results):
                     classify_result = llm_results[i]
                     category = classify_result.chosen
+                    
+                    # Validate that category is from the candidates list
+                    candidates = defects_with_candidates[i]["candidates"]
+                    if category not in candidates:
+                        logger.warning(
+                            f"LLM returned invalid category '{category}' for defect {original_idx}. "
+                            f"Selecting closest match from candidates."
+                        )
+                        # Find closest match from candidates
+                        from rapidfuzz import process as rfprocess, fuzz as rffuzz
+                        best_match = rfprocess.extractOne(
+                            category, 
+                            candidates, 
+                            scorer=rffuzz.ratio
+                        )
+                        if best_match:
+                            category = best_match[0]
+                            logger.info(f"Selected closest match: '{category}'")
+                        else:
+                            category = candidates[0] if candidates else "Неизвестно"
                 else:
                     # Fallback if LLM returned fewer results
                     category = "Неизвестно"
