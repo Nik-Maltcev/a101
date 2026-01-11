@@ -147,18 +147,41 @@ class CategoryIndex:
             # Return first N categories for empty input
             return self._categories[:n]
         
-        # Use rapidfuzz process.extract for efficient top-N search
-        # scorer=fuzz.WRatio provides good balance for partial matches
+        query = text.strip().lower()
+        
+        # Use token_set_ratio for better matching of partial phrases
+        # It handles word order and partial matches better than WRatio
         results = process.extract(
-            query=text.strip(),
+            query=query,
             choices=self._categories,
-            scorer=fuzz.WRatio,
+            scorer=fuzz.token_set_ratio,
+            limit=n * 2  # Get more candidates initially
+        )
+        
+        # Also try partial_ratio for substring matches
+        partial_results = process.extract(
+            query=query,
+            choices=self._categories,
+            scorer=fuzz.partial_ratio,
             limit=n
         )
         
-        # Extract just the category names from results
-        # results format: [(match, score, index), ...]
-        return [match for match, score, idx in results]
+        # Combine and deduplicate results, prioritizing higher scores
+        seen = set()
+        combined = []
+        
+        # Merge both result sets
+        all_results = list(results) + list(partial_results)
+        all_results.sort(key=lambda x: x[1], reverse=True)
+        
+        for match, score, idx in all_results:
+            if match not in seen:
+                seen.add(match)
+                combined.append(match)
+                if len(combined) >= n:
+                    break
+        
+        return combined
     
     def check_and_rebuild(self) -> bool:
         """Check if the categories file has changed and rebuild if needed.
