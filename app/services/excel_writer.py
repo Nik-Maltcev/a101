@@ -6,6 +6,7 @@ Implements Requirements 7.1, 7.2, 7.3:
 - Saves to results/{job_id}_processed.xlsx
 """
 
+import logging
 from pathlib import Path
 from typing import Optional
 
@@ -13,6 +14,8 @@ from openpyxl import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
 
 from app.models.schemas import ExpandedRow
+
+logger = logging.getLogger(__name__)
 
 
 class ExcelWriterError(Exception):
@@ -136,16 +139,21 @@ class ExcelWriter:
             rows: List of ExpandedRow objects
             headers: List of column headers (determines column order)
         """
+        categories_written = 0
         for row_idx, expanded_row in enumerate(rows, start=2):
             for col_idx, header in enumerate(headers, start=1):
                 if header == self.CATEGORY_COLUMN_NAME:
                     # Write category from ExpandedRow
                     value = expanded_row.category or ""
+                    if expanded_row.category:
+                        categories_written += 1
                 else:
                     # Write from original_data
                     value = expanded_row.original_data.get(header)
                 
                 sheet.cell(row=row_idx, column=col_idx, value=value)
+        
+        logger.info(f"ExcelWriter: Wrote {len(rows)} rows, {categories_written} with categories")
 
 
 def get_output_path(job_id: str, results_dir: str | Path) -> Path:

@@ -351,21 +351,7 @@ async def get_analytics(job_id: str):
     
     logger.info(f"Analytics: Found headers: {headers}")
     
-    # Read all data
-    rows = []
-    for row in sheet.iter_rows(min_row=2, values_only=True):
-        row_data = {}
-        for i, value in enumerate(row):
-            if i < len(headers):
-                row_data[headers[i]] = str(value) if value is not None else ""
-        if any(v for v in row_data.values() if v):  # Skip empty rows
-            rows.append(row_data)
-    
-    workbook.close()
-    
-    logger.info(f"Analytics: Read {len(rows)} rows")
-    
-    # Find category column (case-insensitive)
+    # Find category column FIRST (case-insensitive)
     category_column = None
     for h in headers:
         if "категория" in h.lower():
@@ -374,26 +360,60 @@ async def get_analytics(job_id: str):
     
     logger.info(f"Analytics: Category column = {category_column}")
     
+    # Read all data
+    rows = []
+    for row in sheet.iter_rows(min_row=2, values_only=True):
+        row_data = {}
+        for i, value in enumerate(row):
+            if i < len(headers):
+                # Convert to string, handle None
+                row_data[headers[i]] = str(value).strip() if value is not None else ""
+        if any(v for v in row_data.values() if v):  # Skip empty rows
+            rows.append(row_data)
+    
+    workbook.close()
+    
+    logger.info(f"Analytics: Read {len(rows)} rows")
+    
     # Calculate category distribution
     category_distribution = []
     total_categories = 0
     
-    if category_column:
-        categories = [row.get(category_column, "") for row in rows if row.get(category_column)]
-        category_counts = Counter(categories)
-        total_categories = len(category_counts)
-        total = len(categories) if categories else 1
-        category_distribution = [
-            {"category": cat, "count": count, "percentage": round(count / total * 100, 1)}
-            for cat, count in category_counts.most_common(20)
-        ]
+    if category_column and rows:
+        # Get all non-empty category values
+        categories = []
+        # Log first few rows for debugging
+        for i, row in enumerate(rows[:5]):
+            cat_value = row.get(category_column, "")
+            logger.info(f"Analytics: Row {i} category raw value: '{cat_value}' (type: {type(cat_value).__name__})")
+        
+        for row in rows:
+            cat_value = row.get(category_column, "")
+            if cat_value and cat_value != "None" and cat_value.strip():
+                categories.append(cat_value)
+        
+        logger.info(f"Analytics: Found {len(categories)} non-empty category values out of {len(rows)} rows")
+        
+        if categories:
+            category_counts = Counter(categories)
+            total_categories = len(category_counts)
+            total = len(categories)
+            category_distribution = [
+                {"category": cat, "count": count, "percentage": round(count / total * 100, 1)}
+                for cat, count in category_counts.most_common(20)
+            ]
+        
         logger.info(f"Analytics: Found {total_categories} unique categories")
     
     # Get unique values for each column (for filters)
     column_values = {}
     for header in headers:
-        values = set(str(row.get(header, "")) for row in rows if row.get(header))
-        column_values[header] = sorted(list(values))[:50]  # Limit to 50 unique values
+        values = set()
+        for row in rows:
+            val = row.get(header, "")
+            if val and val != "None":
+                values.add(val)
+        column_values[header] = sorted(list(values))[:50]
     
     return {
         "total_rows": len(rows),
@@ -402,5 +422,5 @@ async def get_analytics(job_id: str):
         "category_column": category_column,
         "category_distribution": category_distribution,
         "column_values": column_values,
-        "data": rows[:500],  # Limit to 500 rows for performance
+        "data": rows[:500],
     }
