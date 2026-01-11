@@ -40,13 +40,16 @@ def _extract_json_from_text(text: str) -> str:
     """
     import re
     
+    # Log raw response for debugging
+    logger.debug(f"Raw LLM response: {text[:1000]}...")
+    
     # Try to find JSON in code blocks first
     code_block_match = re.search(r'```(?:json)?\s*(\{.*?\})\s*```', text, re.DOTALL)
     if code_block_match:
         return code_block_match.group(1)
     
-    # Try to find raw JSON object
-    json_match = re.search(r'\{[^{}]*"results"[^{}]*\[.*?\]\s*\}', text, re.DOTALL)
+    # Try to find raw JSON object with results array
+    json_match = re.search(r'\{\s*"results"\s*:\s*\[.*?\]\s*\}', text, re.DOTALL)
     if json_match:
         return json_match.group(0)
     
@@ -57,6 +60,30 @@ def _extract_json_from_text(text: str) -> str:
         return text[brace_start:brace_end + 1]
     
     return text
+
+
+def _fix_json_string(json_str: str) -> str:
+    """
+    Attempt to fix common JSON issues from LLM responses.
+    
+    Args:
+        json_str: Potentially malformed JSON string
+        
+    Returns:
+        Fixed JSON string
+    """
+    import re
+    
+    # Remove trailing commas before ] or }
+    json_str = re.sub(r',\s*([}\]])', r'\1', json_str)
+    
+    # Fix unescaped newlines in strings
+    json_str = re.sub(r'(?<!\\)\n', r'\\n', json_str)
+    
+    # Remove control characters
+    json_str = re.sub(r'[\x00-\x1f\x7f-\x9f]', '', json_str)
+    
+    return json_str
 
 
 class LLMClient:
@@ -276,7 +303,15 @@ class LLMClient:
         try:
             # Extract JSON from response (handles reasoner's text output)
             json_str = _extract_json_from_text(response)
-            data = json.loads(json_str)
+            
+            # Try to parse, if fails try to fix
+            try:
+                data = json.loads(json_str)
+            except json.JSONDecodeError:
+                logger.warning("Initial JSON parse failed, attempting to fix...")
+                json_str = _fix_json_string(json_str)
+                data = json.loads(json_str)
+            
             results = data.get("results", [])
             
             if len(results) != expected_count:
@@ -303,6 +338,7 @@ class LLMClient:
             
         except json.JSONDecodeError as e:
             logger.error(f"Failed to parse split response: {e}")
+            logger.error(f"Raw response (first 500 chars): {response[:500]}")
             raise LLMResponseParseError(f"Invalid JSON response: {e}")
         except Exception as e:
             logger.error(f"Error parsing split response: {e}")
@@ -325,7 +361,15 @@ class LLMClient:
         try:
             # Extract JSON from response (handles reasoner's text output)
             json_str = _extract_json_from_text(response)
-            data = json.loads(json_str)
+            
+            # Try to parse, if fails try to fix
+            try:
+                data = json.loads(json_str)
+            except json.JSONDecodeError:
+                logger.warning("Initial JSON parse failed, attempting to fix...")
+                json_str = _fix_json_string(json_str)
+                data = json.loads(json_str)
+            
             results = data.get("results", [])
             
             if len(results) != expected_count:
@@ -346,6 +390,7 @@ class LLMClient:
             
         except json.JSONDecodeError as e:
             logger.error(f"Failed to parse classify response: {e}")
+            logger.error(f"Raw response (first 500 chars): {response[:500]}")
             raise LLMResponseParseError(f"Invalid JSON response: {e}")
         except Exception as e:
             logger.error(f"Error parsing classify response: {e}")
