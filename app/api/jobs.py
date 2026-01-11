@@ -309,3 +309,72 @@ async def download_result(job_id: str) -> FileResponse:
         filename=f"{job_id}_processed.xlsx",
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     )
+
+
+@router.get("/{job_id}/analytics")
+async def get_analytics(job_id: str):
+    """
+    Get analytics data for a completed job.
+    
+    Returns category distribution, column info, and raw data.
+    """
+    from openpyxl import load_workbook
+    from collections import Counter
+    
+    job = get_job(job_id)
+    
+    if job is None:
+        raise HTTPException(status_code=404, detail="Job not found")
+    
+    if job.status != JobStatus.COMPLETED:
+        raise HTTPException(status_code=400, detail="Job is not completed yet")
+    
+    if not job.output_file:
+        raise HTTPException(status_code=404, detail="Result file not found")
+    
+    output_path = Path(job.output_file)
+    if not output_path.exists():
+        raise HTTPException(status_code=404, detail="Result file not found")
+    
+    # Read the processed file
+    workbook = load_workbook(filename=output_path, read_only=True, data_only=True)
+    sheet = workbook.active
+    
+    # Get headers
+    headers = [cell.value for cell in sheet[1] if cell.value]
+    
+    # Read all data
+    rows = []
+    for row in sheet.iter_rows(min_row=2, values_only=True):
+        row_data = {}
+        for i, value in enumerate(row):
+            if i < len(headers):
+                row_data[headers[i]] = value if value is not None else ""
+        if any(row_data.values()):  # Skip empty rows
+            rows.append(row_data)
+    
+    workbook.close()
+    
+    # Calculate category distribution
+    category_column = "Категория дефекта"
+    categories = [row.get(category_column, "") for row in rows if row.get(category_column)]
+    category_counts = Counter(categories)
+    category_distribution = [
+        {"category": cat, "count": count, "percentage": round(count / len(categories) * 100, 1) if categories else 0}
+        for cat, count in category_counts.most_common(20)
+    ]
+    
+    # Get unique values for each column (for filters)
+    column_values = {}
+    for header in headers:
+        values = set(str(row.get(header, "")) for row in rows if row.get(header))
+        column_values[header] = sorted(list(values))[:50]  # Limit to 50 unique values
+    
+    return {
+        "total_rows": len(rows),
+        "total_categories": len(category_counts),
+        "headers": headers,
+        "category_distribution": category_distribution,
+        "column_values": column_values,
+        "data": rows[:500],  # Limit to 500 rows for performance
+    }
