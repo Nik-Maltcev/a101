@@ -31,7 +31,7 @@ def sample_xlsx_bytes():
     
     # Headers
     ws["A1"] = "ID"
-    ws["B1"] = "КОММЕНТАРИЙ"
+    ws["B1"] = "Суть обращения"
     ws["C1"] = "Status"
     
     # Data rows

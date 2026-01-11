@@ -12,7 +12,7 @@ class ExcelReaderError(Exception):
 
 
 class CommentColumnNotFoundError(ExcelReaderError):
-    """Raised when the КОММЕНТАРИЙ column is not found."""
+    """Raised when the comment column is not found."""
     pass
 
 
@@ -21,11 +21,11 @@ class ExcelReader:
     
     Implements Requirements 2.1, 2.2, 2.3:
     - Opens XLSX files using openpyxl
-    - Finds the "КОММЕНТАРИЙ" column by name
+    - Finds the "Суть обращения" column by name
     - Extracts all data rows
     """
     
-    COMMENT_COLUMN_NAME = "КОММЕНТАРИЙ"
+    COMMENT_COLUMN_NAME = "Суть обращения"
     
     def read_file(self, file_path: str | Path) -> list[dict]:
         """Read xlsx file and return list of rows as dictionaries.
@@ -58,7 +58,7 @@ class ExcelReader:
             # Get headers from first row
             headers = self._get_headers(sheet)
             
-            # Verify КОММЕНТАРИЙ column exists
+            # Verify comment column exists
             comment_col_idx = self.find_comment_column(sheet)
             if comment_col_idx is None:
                 raise CommentColumnNotFoundError(
@@ -79,7 +79,7 @@ class ExcelReader:
             raise ExcelReaderError(f"Failed to read file: {e}")
     
     def find_comment_column(self, sheet: Worksheet) -> Optional[int]:
-        """Find the index of the КОММЕНТАРИЙ column.
+        """Find the index of the comment column.
         
         Args:
             sheet: openpyxl worksheet

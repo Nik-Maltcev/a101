@@ -31,7 +31,7 @@ class ExcelWriter:
     """
     
     CATEGORY_COLUMN_NAME = "Категория дефекта"
-    COMMENT_COLUMN_NAME = "КОММЕНТАРИЙ"
+    COMMENT_COLUMN_NAME = "Суть обращения"
     
     def write_result(
         self,

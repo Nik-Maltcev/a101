@@ -3,14 +3,14 @@
 Implements Requirements 4.1, 4.2, 4.3, 4.4:
 - Creates a separate row for each defect
 - Copies all original columns
-- Replaces КОММЕНТАРИЙ column with defect text
+- Replaces "Суть обращения" column with defect text
 """
 
 from typing import Optional
 from app.models.schemas import ExpandedRow
 
 
-COMMENT_COLUMN_NAME = "КОММЕНТАРИЙ"
+COMMENT_COLUMN_NAME = "Суть обращения"
 
 
 def expand_rows(
@@ -30,7 +30,7 @@ def expand_rows(
         rows: List of original row dictionaries from ExcelReader
         defects_per_row: List of defect lists, one per input row.
                         defects_per_row[i] contains defects for rows[i]
-        comment_column: Name of the comment column (default: "КОММЕНТАРИЙ")
+        comment_column: Name of the comment column (default: "Суть обращения")
         
     Returns:
         List of ExpandedRow objects, one per defect
@@ -39,7 +39,7 @@ def expand_rows(
         ValueError: If rows and defects_per_row have different lengths
         
     Example:
-        >>> rows = [{"ID": "1", "КОММЕНТАРИЙ": "defect A; defect B"}]
+        >>> rows = [{"ID": "1", "Суть обращения": "defect A; defect B"}]
         >>> defects = [["defect A", "defect B"]]
         >>> result = expand_rows(rows, defects)
         >>> len(result)  # 2 rows, one per defect

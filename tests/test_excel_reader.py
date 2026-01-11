@@ -21,13 +21,13 @@ def excel_reader():
 
 @pytest.fixture
 def sample_xlsx_with_comments(tmp_path):
-    """Create a sample xlsx file with КОММЕНТАРИЙ column."""
+    """Create a sample xlsx file with Суть обращения column."""
     wb = Workbook()
     ws = wb.active
     
     # Headers
     ws["A1"] = "ID"
-    ws["B1"] = "КОММЕНТАРИЙ"
+    ws["B1"] = "Суть обращения"
     ws["C1"] = "Status"
     
     # Data rows
@@ -52,7 +52,7 @@ def sample_xlsx_with_comments(tmp_path):
 
 @pytest.fixture
 def sample_xlsx_without_comments(tmp_path):
-    """Create a sample xlsx file without КОММЕНТАРИЙ column."""
+    """Create a sample xlsx file without Суть обращения column."""
     wb = Workbook()
     ws = wb.active
     
@@ -75,21 +75,21 @@ class TestExcelReader:
     """Tests for ExcelReader class."""
     
     def test_read_file_success(self, excel_reader, sample_xlsx_with_comments):
-        """Test reading a valid xlsx file with КОММЕНТАРИЙ column."""
+        """Test reading a valid xlsx file with Суть обращения column."""
         rows = excel_reader.read_file(sample_xlsx_with_comments)
         
         assert len(rows) == 3
         assert rows[0]["ID"] == "1"
-        assert rows[0]["КОММЕНТАРИЙ"] == "Дефект 1, дефект 2"
+        assert rows[0]["Суть обращения"] == "Дефект 1, дефект 2"
         assert rows[0]["Status"] == "Open"
         
         assert rows[1]["ID"] == "2"
-        assert rows[1]["КОММЕНТАРИЙ"] == "Дефект 3"
+        assert rows[1]["Суть обращения"] == "Дефект 3"
         
-        assert rows[2]["КОММЕНТАРИЙ"] == "нет замечаний"
+        assert rows[2]["Суть обращения"] == "нет замечаний"
     
     def test_find_comment_column(self, excel_reader, sample_xlsx_with_comments):
-        """Test finding КОММЕНТАРИЙ column index."""
+        """Test finding Суть обращения column index."""
         from openpyxl import load_workbook
         
         wb = load_workbook(sample_xlsx_with_comments, read_only=True)
@@ -101,7 +101,7 @@ class TestExcelReader:
         wb.close()
     
     def test_find_comment_column_not_found(self, excel_reader, sample_xlsx_without_comments):
-        """Test when КОММЕНТАРИЙ column is not found."""
+        """Test when Суть обращения column is not found."""
         from openpyxl import load_workbook
         
         wb = load_workbook(sample_xlsx_without_comments, read_only=True)
@@ -113,7 +113,7 @@ class TestExcelReader:
         wb.close()
     
     def test_read_file_missing_comment_column(self, excel_reader, sample_xlsx_without_comments):
-        """Test reading file without КОММЕНТАРИЙ column raises error."""
+        """Test reading file without Суть обращения column raises error."""
         with pytest.raises(CommentColumnNotFoundError):
             excel_reader.read_file(sample_xlsx_without_comments)
     
