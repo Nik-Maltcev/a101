@@ -57,6 +57,7 @@ class CategoryIndex:
         """Load categories from the Excel file.
         
         Reads the first column of the first sheet as category names.
+        Filters out section headers (lines starting with digits like "01.", "02.").
         
         Returns:
             List of category strings
@@ -65,6 +66,8 @@ class CategoryIndex:
             CategoryFileNotFoundError: If file doesn't exist
             CategoryIndexError: If file cannot be read
         """
+        import re
+        
         if not self._categories_path.exists():
             raise CategoryFileNotFoundError(
                 f"Categories file not found: {self._categories_path}"
@@ -82,13 +85,18 @@ class CategoryIndex:
                 raise CategoryIndexError("No active sheet found in categories file")
 
             categories = []
+            # Pattern to match section headers like "01.", "02.", etc.
+            section_pattern = re.compile(r'^\d+\.\s')
             
             # Read first column, skip header row
             for row in sheet.iter_rows(min_row=2, max_col=1, values_only=True):
                 cell_value = row[0]
                 if cell_value is not None:
                     category = str(cell_value).strip()
-                    if category:  # Skip empty strings
+                    if category:
+                        # Skip section headers (start with digits like "01.", "02.")
+                        if section_pattern.match(category):
+                            continue
                         categories.append(category)
             
             workbook.close()
