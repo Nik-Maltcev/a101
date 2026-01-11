@@ -28,6 +28,37 @@ class LLMResponseParseError(LLMClientError):
     pass
 
 
+def _extract_json_from_text(text: str) -> str:
+    """
+    Extract JSON from text that may contain markdown code blocks or other text.
+    
+    Args:
+        text: Raw text that may contain JSON
+        
+    Returns:
+        Extracted JSON string
+    """
+    import re
+    
+    # Try to find JSON in code blocks first
+    code_block_match = re.search(r'```(?:json)?\s*(\{.*?\})\s*```', text, re.DOTALL)
+    if code_block_match:
+        return code_block_match.group(1)
+    
+    # Try to find raw JSON object
+    json_match = re.search(r'\{[^{}]*"results"[^{}]*\[.*?\]\s*\}', text, re.DOTALL)
+    if json_match:
+        return json_match.group(0)
+    
+    # Last resort: find anything that looks like JSON
+    brace_start = text.find('{')
+    brace_end = text.rfind('}')
+    if brace_start != -1 and brace_end != -1 and brace_end > brace_start:
+        return text[brace_start:brace_end + 1]
+    
+    return text
+
+
 class LLMClient:
     """Client for working with LLM API (Deepseek/GPT)."""
     
@@ -79,12 +110,13 @@ class LLMClient:
             await self._client.aclose()
             self._client = None
 
-    async def _call_api(self, messages: list[dict]) -> str:
+    async def _call_api(self, messages: list[dict], use_json_format: bool = True) -> str:
         """
         Make a call to the LLM API.
         
         Args:
             messages: List of message dicts with role and content
+            use_json_format: Whether to request JSON response format
             
         Returns:
             The assistant's response content
@@ -94,17 +126,28 @@ class LLMClient:
         """
         client = await self._get_client()
         
+        is_reasoner = "reasoner" in self.model.lower()
+        
+        # For reasoner model, convert system message to user message
+        if is_reasoner and messages and messages[0].get("role") == "system":
+            system_content = messages[0]["content"]
+            messages = messages[1:]
+            if messages:
+                messages[0]["content"] = f"{system_content}\n\n{messages[0]['content']}"
+        
         payload = {
             "model": self.model,
             "messages": messages,
-            "temperature": 0.1,  # Low temperature for consistent results
         }
         
-        # Add response_format for JSON output (supported by both deepseek-chat and deepseek-reasoner)
-        payload["response_format"] = {"type": "json_object"}
+        # Reasoner doesn't support temperature and response_format
+        if not is_reasoner:
+            payload["temperature"] = 0.1
+            if use_json_format:
+                payload["response_format"] = {"type": "json_object"}
         
         try:
-            logger.info(f"Sending request to LLM API: {self.api_url}/chat/completions")
+            logger.info(f"Sending request to LLM API: {self.api_url}/chat/completions (model: {self.model})")
             logger.debug(f"Payload model: {payload.get('model')}, messages count: {len(messages)}")
             
             response = await client.post(
@@ -119,12 +162,12 @@ class LLMClient:
             message = data["choices"][0]["message"]
             
             # For deepseek-reasoner model, reasoning_content contains the thinking process
-            # We only need the final content for our use case
             content = message.get("content", "")
             
             # Log reasoning if present (for debugging)
             if message.get("reasoning_content"):
-                logger.debug(f"Model reasoning: {message['reasoning_content'][:200]}...")
+                logger.info(f"Model reasoning length: {len(message['reasoning_content'])} chars")
+                logger.debug(f"Model reasoning: {message['reasoning_content'][:500]}...")
             
             return content
             
@@ -231,7 +274,9 @@ class LLMClient:
             LLMResponseParseError: If response cannot be parsed
         """
         try:
-            data = json.loads(response)
+            # Extract JSON from response (handles reasoner's text output)
+            json_str = _extract_json_from_text(response)
+            data = json.loads(json_str)
             results = data.get("results", [])
             
             if len(results) != expected_count:
@@ -278,7 +323,9 @@ class LLMClient:
             LLMResponseParseError: If response cannot be parsed
         """
         try:
-            data = json.loads(response)
+            # Extract JSON from response (handles reasoner's text output)
+            json_str = _extract_json_from_text(response)
+            data = json.loads(json_str)
             results = data.get("results", [])
             
             if len(results) != expected_count:
