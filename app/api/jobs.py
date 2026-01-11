@@ -320,6 +320,9 @@ async def get_analytics(job_id: str):
     """
     from openpyxl import load_workbook
     from collections import Counter
+    import logging
+    
+    logger = logging.getLogger(__name__)
     
     job = get_job(job_id)
     
@@ -340,8 +343,13 @@ async def get_analytics(job_id: str):
     workbook = load_workbook(filename=output_path, read_only=True, data_only=True)
     sheet = workbook.active
     
-    # Get headers
-    headers = [cell.value for cell in sheet[1] if cell.value]
+    # Get headers from first row
+    headers = []
+    for cell in sheet[1]:
+        if cell.value:
+            headers.append(str(cell.value))
+    
+    logger.info(f"Analytics: Found headers: {headers}")
     
     # Read all data
     rows = []
@@ -349,20 +357,37 @@ async def get_analytics(job_id: str):
         row_data = {}
         for i, value in enumerate(row):
             if i < len(headers):
-                row_data[headers[i]] = value if value is not None else ""
-        if any(row_data.values()):  # Skip empty rows
+                row_data[headers[i]] = str(value) if value is not None else ""
+        if any(v for v in row_data.values() if v):  # Skip empty rows
             rows.append(row_data)
     
     workbook.close()
     
+    logger.info(f"Analytics: Read {len(rows)} rows")
+    
+    # Find category column (case-insensitive)
+    category_column = None
+    for h in headers:
+        if "категория" in h.lower():
+            category_column = h
+            break
+    
+    logger.info(f"Analytics: Category column = {category_column}")
+    
     # Calculate category distribution
-    category_column = "Категория дефекта"
-    categories = [row.get(category_column, "") for row in rows if row.get(category_column)]
-    category_counts = Counter(categories)
-    category_distribution = [
-        {"category": cat, "count": count, "percentage": round(count / len(categories) * 100, 1) if categories else 0}
-        for cat, count in category_counts.most_common(20)
-    ]
+    category_distribution = []
+    total_categories = 0
+    
+    if category_column:
+        categories = [row.get(category_column, "") for row in rows if row.get(category_column)]
+        category_counts = Counter(categories)
+        total_categories = len(category_counts)
+        total = len(categories) if categories else 1
+        category_distribution = [
+            {"category": cat, "count": count, "percentage": round(count / total * 100, 1)}
+            for cat, count in category_counts.most_common(20)
+        ]
+        logger.info(f"Analytics: Found {total_categories} unique categories")
     
     # Get unique values for each column (for filters)
     column_values = {}
@@ -372,8 +397,9 @@ async def get_analytics(job_id: str):
     
     return {
         "total_rows": len(rows),
-        "total_categories": len(category_counts),
+        "total_categories": total_categories,
         "headers": headers,
+        "category_column": category_column,
         "category_distribution": category_distribution,
         "column_values": column_values,
         "data": rows[:500],  # Limit to 500 rows for performance

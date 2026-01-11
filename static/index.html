@@ -625,6 +625,15 @@
             if (categoryChart) categoryChart.destroy();
 
             const data = analyticsData.category_distribution.slice(0, 15);
+            
+            if (data.length === 0) {
+                ctx.font = '16px Arial';
+                ctx.fillStyle = '#999';
+                ctx.textAlign = 'center';
+                ctx.fillText('Нет данных о категориях', ctx.canvas.width / 2, ctx.canvas.height / 2);
+                return;
+            }
+            
             const colors = [
                 '#667eea', '#764ba2', '#f093fb', '#f5576c', '#4facfe',
                 '#00f2fe', '#43e97b', '#38f9d7', '#fa709a', '#fee140',
