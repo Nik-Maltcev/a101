@@ -194,17 +194,28 @@ class ClassifyService:
                 if i < len(llm_results):
                     classify_result = llm_results[i]
                     category = classify_result.chosen
+                    candidates = defects_with_candidates[i]["candidates"]
                     
-                    # Allow "НЕ ОПРЕДЕЛЕНО" as valid response
-                    if category == "НЕ ОПРЕДЕЛЕНО":
-                        logger.info(f"Defect {original_idx}: LLM could not determine category")
-                    # Validate that category is from the candidates list
-                    elif category not in defects_with_candidates[i]["candidates"]:
-                        logger.warning(
-                            f"LLM returned invalid category '{category}' for defect {original_idx}. "
-                            f"Setting to 'НЕ ОПРЕДЕЛЕНО'."
+                    # If LLM returned "НЕ ОПРЕДЕЛЕНО" or invalid category, find closest match
+                    if category == "НЕ ОПРЕДЕЛЕНО" or category not in candidates:
+                        if category != "НЕ ОПРЕДЕЛЕНО":
+                            logger.warning(
+                                f"LLM returned invalid category '{category}' for defect {original_idx}. "
+                                f"Finding closest match."
+                            )
+                        # Find closest match from candidates
+                        from rapidfuzz import process as rfprocess, fuzz as rffuzz
+                        best_match = rfprocess.extractOne(
+                            defect,  # Match against original defect text
+                            candidates, 
+                            scorer=rffuzz.token_set_ratio
                         )
-                        category = "НЕ ОПРЕДЕЛЕНО"
+                        if best_match and best_match[1] > 30:  # Score threshold
+                            category = best_match[0]
+                            logger.info(f"Selected closest match: '{category}' (score: {best_match[1]})")
+                        else:
+                            category = "НЕ ОПРЕДЕЛЕНО"
+                            logger.warning(f"No good match found for defect {original_idx}")
                 else:
                     # Fallback if LLM returned fewer results
                     category = "НЕ ОПРЕДЕЛЕНО"
