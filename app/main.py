@@ -1,5 +1,8 @@
 """FastAPI application entry point."""
 
+import logging
+import sys
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
@@ -7,6 +10,21 @@ from fastapi.staticfiles import StaticFiles
 
 from app.api.jobs import router as jobs_router
 from app.config import settings
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    handlers=[
+        logging.StreamHandler(sys.stdout)
+    ]
+)
+
+# Set log level for our app modules
+logging.getLogger("app").setLevel(logging.INFO)
+logging.getLogger("httpx").setLevel(logging.WARNING)
+
+logger = logging.getLogger(__name__)
 
 app = FastAPI(
     title="Defect Classifier",
@@ -40,3 +58,12 @@ async def root():
 async def health_check():
     """Health check endpoint."""
     return {"status": "healthy"}
+
+
+@app.on_event("startup")
+async def startup_event():
+    """Log startup information."""
+    logger.info("Application starting up...")
+    logger.info(f"LLM API URL: {settings.LLM_API_URL}")
+    logger.info(f"LLM Model: {settings.LLM_MODEL}")
+    logger.info(f"API Key configured: {'Yes' if settings.LLM_API_KEY else 'No'}")

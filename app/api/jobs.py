@@ -92,6 +92,7 @@ async def process_job_async(job_id: str, file_path: str) -> None:
     from app.services.llm_client import LLMClient
     
     logger = logging.getLogger(__name__)
+    logger.info(f"Job {job_id}: Starting async processing")
     llm_client = None
     
     try:
@@ -181,7 +182,16 @@ async def process_job_async(job_id: str, file_path: str) -> None:
 
 def run_process_job(job_id: str, file_path: str):
     """Run async job processing in background."""
-    asyncio.run(process_job_async(job_id, file_path))
+    import logging
+    logger = logging.getLogger(__name__)
+    logger.info(f"Starting background job processing for {job_id}")
+    
+    try:
+        asyncio.run(process_job_async(job_id, file_path))
+        logger.info(f"Background job {job_id} completed")
+    except Exception as e:
+        logger.error(f"Background job {job_id} failed with error: {e}", exc_info=True)
+        update_job_status(job_id, JobStatus.FAILED, error=f"Background processing failed: {e}")
 
 
 @router.post("", response_model=JobResponse)
