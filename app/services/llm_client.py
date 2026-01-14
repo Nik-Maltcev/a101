@@ -258,10 +258,11 @@ CONTENT:
 1. Номер в начале строки или предложения (1, 2, 3 или 1., 2., 3. или 1Текст 2Текст) = НОВЫЙ ДЕФЕКТ.
 2. Если текст содержит СПИСОК с новой строки (каждая строка начинается с 1..., 2... или 1. ..., 2. ...), то КАЖДАЯ такая строка - это ОТДЕЛЬНЫЙ дефект.
 3. Точка с запятой (;) = НОВЫЙ ДЕФЕКТ.
-4. Убирай номера из начала (1Царапины → Царапины, 1. Дефект → Дефект).
-5. Если текст БЕЗ номеров и БЕЗ разделителей = ОДИН дефект.
-6. "нет замечаний" или пустой текст = пустой список [].
-7. Заголовки типа "Окно 2" или "Кухня":
+4. Если текст содержит несколько строк и строки выглядят как отдельные дефекты (нет нумерации), разделяй по строкам.
+5. Убирай номера из начала (1Царапины → Царапины, 1. Дефект → Дефект).
+6. Если текст БЕЗ номеров и БЕЗ разделителей = ОДИН дефект.
+7. "нет замечаний" или пустой текст = пустой список [].
+8. Заголовки типа "Окно 2" или "Кухня":
    - Если после заголовка идет нумерованный список дефектов -> ИГНОРИРОВАТЬ заголовок, извлекать ТОЛЬКО пункты списка.
    - Если КРОМЕ заголовка ничего нет -> пустой список [].
 
@@ -363,6 +364,124 @@ CONTENT:
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt},
         ]
+
+    def _coerce_split_item(self, item: object) -> list[str]:
+        """Coerce a single split result item into a list of defect strings."""
+        if item is None:
+            return []
+
+        if isinstance(item, list):
+            return item
+
+        if isinstance(item, str):
+            stripped = item.strip()
+            if not stripped:
+                return []
+            try:
+                parsed = json.loads(stripped, strict=False)
+            except json.JSONDecodeError:
+                parsed = None
+
+            if isinstance(parsed, list):
+                return parsed
+            if isinstance(parsed, dict):
+                results = parsed.get("results")
+                if isinstance(results, list):
+                    return results
+                defects = parsed.get("defects")
+                if isinstance(defects, list):
+                    return defects
+
+            lines = [line.strip() for line in stripped.splitlines() if line.strip()]
+            if len(lines) > 1:
+                return lines
+            return [stripped]
+
+        if isinstance(item, dict):
+            defects = item.get("defects")
+            if isinstance(defects, list):
+                return defects
+            results = item.get("results")
+            if isinstance(results, list):
+                return results
+            return [json.dumps(item, ensure_ascii=False)]
+
+        return [str(item)]
+
+    def _coerce_split_payload(self, data: object) -> list:
+        """Normalize a parsed split payload into a list of split items."""
+        if isinstance(data, list):
+            return data
+        if isinstance(data, dict):
+            results = data.get("results")
+            if isinstance(results, list):
+                return results
+        return []
+
+    def _find_best_split_results(self, response: str) -> list:
+        """Find the largest viable split results list embedded in the response."""
+        if not response:
+            return []
+
+        candidates: list[list] = []
+        search_start = 0
+        marker = '{"results":'
+
+        while True:
+            idx = response.find(marker, search_start)
+            if idx == -1:
+                idx = response.find('{ "results":', search_start)
+                if idx == -1:
+                    break
+            extracted = self._extract_json_object(response, idx)
+            if extracted:
+                try:
+                    data = json.loads(extracted, strict=False)
+                except json.JSONDecodeError:
+                    data = None
+                results = self._coerce_split_payload(data)
+                if results:
+                    candidates.append(results)
+                search_start = idx + len(marker)
+            else:
+                search_start = idx + len(marker)
+
+        if not candidates:
+            return []
+
+        return max(candidates, key=len)
+
+    @staticmethod
+    def _extract_json_object(text: str, start_idx: int) -> str | None:
+        """Extract a JSON object from text starting at the given index."""
+        brace_count = 0
+        in_string = False
+        escape_next = False
+
+        for i in range(start_idx, len(text)):
+            char = text[i]
+
+            if escape_next:
+                escape_next = False
+                continue
+
+            if char == '\\':
+                escape_next = True
+                continue
+
+            if char == '"':
+                in_string = not in_string
+                continue
+
+            if not in_string:
+                if char == '{':
+                    brace_count += 1
+                elif char == '}':
+                    brace_count -= 1
+                    if brace_count == 0:
+                        return text[start_idx:i + 1]
+
+        return None
     
     def _parse_split_response(self, response: str, expected_count: int) -> list[SplitResult]:
         """
@@ -390,8 +509,16 @@ CONTENT:
                 logger.warning("Initial JSON parse failed, attempting to fix...")
                 json_str = _fix_json_string(json_str)
                 data = json.loads(json_str, strict=False)
-            
-            results = data.get("results", [])
+            results = self._coerce_split_payload(data)
+
+            if len(results) < expected_count:
+                best_results = self._find_best_split_results(response)
+                if best_results and len(best_results) > len(results):
+                    logger.warning(
+                        "Using alternate split results with more items "
+                        f"({len(best_results)} vs {len(results)})."
+                    )
+                    results = best_results
             
             if len(results) != expected_count:
                 logger.warning(
@@ -409,7 +536,7 @@ CONTENT:
                 # Ensure item is a list of strings
                 if not isinstance(item, list):
                     logger.warning(f"Result {idx} is not a list: {item}")
-                    item = [] if not item else [str(item)]
+                    item = self._coerce_split_item(item)
 
                 defects = [
                     DefectItem(text=str(d))
