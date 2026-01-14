@@ -123,10 +123,15 @@ class ExcelReader:
         Returns:
             List of dictionaries with column headers as keys
         """
+        import logging
+        logger = logging.getLogger(__name__)
+        
         rows = []
+        row_num = 1
         
         # Skip header row, iterate from row 2
         for row in sheet.iter_rows(min_row=2, values_only=True):
+            row_num += 1
             # Skip completely empty rows
             if all(cell is None or str(cell).strip() == "" for cell in row):
                 continue
@@ -135,6 +140,9 @@ class ExcelReader:
             for idx, header in enumerate(headers):
                 if idx < len(row):
                     value = row[idx]
+                    # Log raw cell value for valueText column
+                    if header.upper() == "VALUETEXT" and row_num <= 5:
+                        logger.info(f"Row {row_num} valueText raw: type={type(value).__name__}, repr={repr(value)[:300] if value else 'None'}")
                     # Convert to string if not None, preserve None for empty cells
                     row_dict[header] = str(value) if value is not None else None
                 else:
