@@ -525,7 +525,7 @@ class LLMClient:
         """
         Classify defects by selecting category from candidates using LLM.
         
-        Processes defects in batches according to CLASSIFY_BATCH_SIZE setting.
+        Processes defects in batches with concurrent API requests for speed.
         
         Args:
             defects_with_candidates: List of dicts with keys:
@@ -542,17 +542,46 @@ class LLMClient:
         if not defects_with_candidates:
             return []
         
-        batch_size = settings.CLASSIFY_BATCH_SIZE
-        all_results: list[ClassifyResult] = []
+        import asyncio
         
+        batch_size = settings.CLASSIFY_BATCH_SIZE
+        concurrent_batches = getattr(settings, 'CLASSIFY_CONCURRENT_BATCHES', 3)
+        
+        # Split into batches
+        batches = []
         for i in range(0, len(defects_with_candidates), batch_size):
-            batch = defects_with_candidates[i:i + batch_size]
-            logger.info(f"Processing classify batch {i // batch_size + 1}, size: {len(batch)}")
-            
+            batches.append(defects_with_candidates[i:i + batch_size])
+        
+        logger.info(f"Processing {len(batches)} classify batches with {concurrent_batches} concurrent requests")
+        
+        async def process_batch(batch_idx: int, batch: list[dict]) -> tuple[int, list[ClassifyResult]]:
+            """Process a single batch and return results with index."""
+            logger.info(f"Processing classify batch {batch_idx + 1}/{len(batches)}, size: {len(batch)}")
             messages = self._build_classify_prompt(batch)
             response = await self._call_api(messages)
             batch_results = self._parse_classify_response(response, len(batch))
-            all_results.extend(batch_results)
+            logger.info(f"Batch {batch_idx + 1} complete")
+            return (batch_idx, batch_results)
+        
+        # Process batches with concurrency limit
+        all_results: list[ClassifyResult] = [None] * len(defects_with_candidates)  # Pre-allocate
+        
+        for i in range(0, len(batches), concurrent_batches):
+            # Process up to concurrent_batches at once
+            batch_group = batches[i:i + concurrent_batches]
+            tasks = [
+                process_batch(i + j, batch) 
+                for j, batch in enumerate(batch_group)
+            ]
+            
+            # Wait for all tasks in this group
+            results = await asyncio.gather(*tasks)
+            
+            # Place results in correct positions
+            for batch_idx, batch_results in results:
+                start_idx = batch_idx * batch_size
+                for j, result in enumerate(batch_results):
+                    all_results[start_idx + j] = result
         
         return all_results
     

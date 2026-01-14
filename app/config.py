@@ -28,11 +28,12 @@ class Settings(BaseSettings):
     # LLM configuration
     LLM_API_KEY: str = ""
     LLM_API_URL: str = "https://api.deepseek.com"
-    LLM_MODEL: str = "deepseek-chat"
+    LLM_MODEL: str = "deepseek-reasoner"  # Use deepseek-reasoner for accuracy
     
     # Processing settings
-    SPLIT_BATCH_SIZE: int = 30
-    CLASSIFY_BATCH_SIZE: int = 10
+    SPLIT_BATCH_SIZE: int = 50  # Increased for faster processing
+    CLASSIFY_BATCH_SIZE: int = 20  # Increased for faster processing
+    CLASSIFY_CONCURRENT_BATCHES: int = 3  # Number of parallel API requests
     CATEGORY_TOP_N: int = 40  # Increased for 579 categories - rapidfuzz finds top candidates
     
     # File settings
