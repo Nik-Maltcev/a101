@@ -65,6 +65,48 @@ class SplitService:
         """Compute hash for a comment string."""
         return hashlib.sha256(comment.encode("utf-8")).hexdigest()
     
+    @staticmethod
+    def _split_by_numbers(text: str) -> list[str]:
+        """
+        Split text by numbered items (1, 2, 3... or 1., 2., 3...).
+        
+        Args:
+            text: Text with numbered defects
+            
+        Returns:
+            List of defect texts with numbers removed
+        """
+        # Pattern: digit(s) followed by optional dot/space at start or after space
+        # Examples: "1Царапины", "1. Царапины", " 2Трещина"
+        pattern = r'(?:^|\s)(\d+)\.?\s*'
+        
+        # Split by pattern and keep the parts
+        parts = re.split(pattern, text)
+        
+        defects = []
+        # parts will be like: ['', '1', 'Царапины', '2', 'Трещина', ...]
+        # We want to pair numbers with following text
+        i = 1  # Skip first empty element
+        while i < len(parts) - 1:
+            number = parts[i]
+            defect_text = parts[i + 1].strip()
+            if defect_text:
+                defects.append(defect_text)
+            i += 2
+        
+        # If we got defects, return them
+        if defects:
+            return defects
+        
+        # Fallback: try simpler pattern for "1Text 2Text"
+        pattern2 = r'(\d+)([^\d]+?)(?=\d+|$)'
+        matches = re.findall(pattern2, text)
+        if matches:
+            return [match[1].strip() for match in matches if match[1].strip()]
+        
+        # No numbered items found, return original text
+        return [text]
+    
     def _is_empty_comment(self, comment: str) -> bool:
         """
         Check if comment should be treated as empty (no defects).
@@ -209,6 +251,16 @@ class SplitService:
                 if i < len(llm_results):
                     split_result = llm_results[i]
                     defect_texts = [d.text for d in split_result.defects]
+                    
+                    # Fallback: if LLM returned 1 defect but text has numbers, split programmatically
+                    if len(defect_texts) == 1:
+                        # Check if the single defect contains numbered items
+                        if re.search(r'\d+[^\d]{10,}', defect_texts[0]):  # Has digit followed by 10+ non-digits
+                            logger.info(f"Comment {original_idx}: LLM returned 1 defect but text has numbers, splitting programmatically")
+                            programmatic_split = self._split_by_numbers(defect_texts[0])
+                            if len(programmatic_split) > 1:
+                                defect_texts = programmatic_split
+                                logger.info(f"Programmatic split produced {len(defect_texts)} defects")
                 else:
                     # Fallback if LLM returned fewer results
                     defect_texts = []
