@@ -364,6 +364,49 @@ CONTENT:
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt},
         ]
+
+    def _coerce_split_item(self, item: object) -> list[str]:
+        """Coerce a single split result item into a list of defect strings."""
+        if item is None:
+            return []
+
+        if isinstance(item, list):
+            return item
+
+        if isinstance(item, str):
+            stripped = item.strip()
+            if not stripped:
+                return []
+            try:
+                parsed = json.loads(stripped, strict=False)
+            except json.JSONDecodeError:
+                parsed = None
+
+            if isinstance(parsed, list):
+                return parsed
+            if isinstance(parsed, dict):
+                results = parsed.get("results")
+                if isinstance(results, list):
+                    return results
+                defects = parsed.get("defects")
+                if isinstance(defects, list):
+                    return defects
+
+            lines = [line.strip() for line in stripped.splitlines() if line.strip()]
+            if len(lines) > 1:
+                return lines
+            return [stripped]
+
+        if isinstance(item, dict):
+            defects = item.get("defects")
+            if isinstance(defects, list):
+                return defects
+            results = item.get("results")
+            if isinstance(results, list):
+                return results
+            return [json.dumps(item, ensure_ascii=False)]
+
+        return [str(item)]
     
     def _parse_split_response(self, response: str, expected_count: int) -> list[SplitResult]:
         """
@@ -410,7 +453,7 @@ CONTENT:
                 # Ensure item is a list of strings
                 if not isinstance(item, list):
                     logger.warning(f"Result {idx} is not a list: {item}")
-                    item = [] if not item else [str(item)]
+                    item = self._coerce_split_item(item)
 
                 defects = [
                     DefectItem(text=str(d))
