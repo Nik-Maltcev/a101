@@ -226,10 +226,6 @@ class ClassifyService:
                         else:
                             category = "НЕ ОПРЕДЕЛЕНО"
                             logger.warning(f"No good match found for defect {original_idx}")
-                            logger.info(f"Selected closest match: '{category}' (score: {best_match[1]})")
-                        else:
-                            category = "НЕ ОПРЕДЕЛЕНО"
-                            logger.warning(f"No good match found for defect {original_idx}")
                 else:
                     # Fallback if LLM returned fewer results
                     category = "НЕ ОПРЕДЕЛЕНО"
