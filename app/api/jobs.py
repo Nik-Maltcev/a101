@@ -127,9 +127,10 @@ async def process_job_async(job_id: str, file_path: str) -> None:
             
             # Find valueString and valueText (case-insensitive)
             for key in row.keys():
-                if key.upper() == "VALUESTRING":
+                key_upper = key.upper()
+                if key_upper == "VALUESTRING":
                     value_string = row.get(key, "") or ""
-                elif key.upper() == "VALUETEXT":
+                elif key_upper == "VALUETEXT":
                     value_text = row.get(key, "") or ""
             
             # Concatenate with space if both exist
@@ -144,10 +145,22 @@ async def process_job_async(job_id: str, file_path: str) -> None:
         
         comments = [get_comment(row) for row in rows]
         
-        # Log first few comments for debugging
-        logger.info(f"Job {job_id}: First 3 comments to split:")
+        # Log first few comments for debugging - FULL TEXT
+        logger.info(f"Job {job_id}: First 3 comments to split (FULL):")
         for i, comment in enumerate(comments[:3]):
-            logger.info(f"  Comment {i+1}: {comment[:200]}...")
+            logger.info(f"  Comment {i+1} (len={len(comment)}): {comment}")
+        
+        # Also log raw valueString and valueText for first row
+        if rows:
+            first_row = rows[0]
+            vs = ""
+            vt = ""
+            for key in first_row.keys():
+                if key.upper() == "VALUESTRING":
+                    vs = first_row.get(key, "")
+                elif key.upper() == "VALUETEXT":
+                    vt = first_row.get(key, "")
+            logger.info(f"Job {job_id}: Row 0 raw - valueString='{vs}', valueText='{vt}'")
         
         # Step 2: Split comments
         logger.info(f"Job {job_id}: Splitting {len(comments)} comments")
@@ -156,6 +169,12 @@ async def process_job_async(job_id: str, file_path: str) -> None:
         defects_per_row = await split_service.split_batch(comments)
         total_defects = sum(len(d) for d in defects_per_row)
         logger.info(f"Job {job_id}: Found {total_defects} defects")
+        
+        # Log split results for debugging
+        for i, (comment, defects) in enumerate(zip(comments[:5], defects_per_row[:5])):
+            logger.info(f"Job {job_id}: Row {i} - Input: '{comment[:100]}...' -> {len(defects)} defects")
+            for j, defect in enumerate(defects[:3]):
+                logger.info(f"Job {job_id}:   Defect {j+1}: '{defect[:80]}...'")
         
         update_job_status(job_id, JobStatus.SPLITTING, progress=40)
         

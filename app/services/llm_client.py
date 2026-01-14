@@ -412,13 +412,18 @@ class LLMClient:
                 results = results[:expected_count]
             
             parsed_results = []
-            for item in results:
+            for idx, item in enumerate(results):
                 defects = [
                     DefectItem(text=d.get("text", ""))
                     for d in item.get("defects", [])
                     if d.get("text", "").strip()  # Skip empty defects
                 ]
                 parsed_results.append(SplitResult(defects=defects))
+                # Log parsed defects for debugging
+                if idx < 5:
+                    logger.info(f"Parsed result {idx}: {len(defects)} defects")
+                    for d_idx, d in enumerate(defects[:3]):
+                        logger.info(f"  Defect {d_idx+1}: '{d.text[:80]}...' " if len(d.text) > 80 else f"  Defect {d_idx+1}: '{d.text}'")
             
             return parsed_results
             
