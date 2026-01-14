@@ -58,11 +58,13 @@ class ExcelReader:
             # Get headers from first row
             headers = self._get_headers(sheet)
             
-            # Verify comment column exists
-            comment_col_idx = self.find_comment_column(sheet)
-            if comment_col_idx is None:
+            # Verify at least one of valueString or valueText exists
+            has_value_string = any(h.upper() == "VALUESTRING" for h in headers)
+            has_value_text = any(h.upper() == "VALUETEXT" for h in headers)
+            
+            if not has_value_string and not has_value_text:
                 raise CommentColumnNotFoundError(
-                    f"Column '{self.COMMENT_COLUMN_NAME}' not found in file"
+                    "Neither 'valueString' nor 'valueText' column found in file"
                 )
             
             # Extract data rows

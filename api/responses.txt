@@ -1,0 +1,164 @@
+[
+  {
+    "id": 0,
+    "extId": "string",
+    "rating": 0,
+    "ratingComment": "string",
+    "isAccident": true,
+    "sourceTitle": "string",
+    "orderSourceTitle": "string",
+    "orderStatusComment": "string",
+    "responsibleUsers": [
+      {
+        "id": 0,
+        "firstName": "string",
+        "lastName": "string",
+        "fullName": "string",
+        "image": "string",
+        "departmentId": 0,
+        "departmentTitle": "string",
+        "roleTitle": "string",
+        "considerWorkTime": true
+      }
+    ],
+    "inspectors": [
+      {
+        "id": 0,
+        "firstName": "string",
+        "lastName": "string",
+        "fullName": "string",
+        "image": "string",
+        "departmentId": 0,
+        "departmentTitle": "string",
+        "roleTitle": "string",
+        "considerWorkTime": true
+      }
+    ],
+    "responsibleUserStartTime": 0,
+    "solveTimeSLA": 0,
+    "solveTimeFact": 0,
+    "solveTimeWork": 0,
+    "isExpiredSolveTimeSLA": true,
+    "reactionTimeSLA": 0,
+    "reactionTimeFact": 0,
+    "reactionTimeWork": 0,
+    "isExpiredReactionTimeSLA": true,
+    "orderTypeId": 0,
+    "orderTypeTitle": "string",
+    "serviceId": 0,
+    "serviceTitle": "string",
+    "serviceInternalTitle": "string",
+    "userWarning": 0,
+    "serviceTypeId": 0,
+    "serviceTypeTitle": "string",
+    "serviceTypeImage": "string",
+    "createdAt": 0,
+    "updatedAt": 0,
+    "createdByUser": "string",
+    "creditSum": 0,
+    "paidSums": [
+      "Unknown Type: float"
+    ],
+    "refundSums": [
+      "Unknown Type: float"
+    ],
+    "totalSum": 0,
+    "invoiceStatusId": 0,
+    "isPaidByLK": true,
+    "unregisteredCustomerName": "string",
+    "unregisteredPhoneNumber": "string",
+    "unregisteredEmail": "string",
+    "unregisteredAddress": "string",
+    "orderRefundSum": 0,
+    "orderRefundStatusId": 0,
+    "hasOrderRefundWarning": true,
+    "buildingId": 0,
+    "buildingExtId": "string",
+    "buildingTitle": "string",
+    "placeId": 0,
+    "placeExtId": "string",
+    "placeTitle": "string",
+    "placeNumber": "string",
+    "placeAddress": "string",
+    "placeTypeTitle": "string",
+    "placeTypeShortTitle": "string",
+    "placeFloor": 0,
+    "placeEntranceNumber": "string",
+    "accountNumber": "string",
+    "customerId": 0,
+    "customerFullName": "string",
+    "customerShortName": "string",
+    "customerPhoneNumber": "string",
+    "customerTypeId": 0,
+    "customerSummary": "string",
+    "customerMainDebt": 0,
+    "customerCapitalRepairDebt": 0,
+    "orderStatusId": 0,
+    "orderStatusTitle": "string",
+    "orderStatusColor": "string",
+    "orderStatusColorName": "string",
+    "orderStatusReopenCount": 0,
+    "customerDebt": 0,
+    "acceptedOrderUser": "string",
+    "acceptedOrderAt": 0,
+    "acceptedOrderUserId": 0,
+    "acceptedOrderUserFullName": "string",
+    "workOrderAt": 0,
+    "workOrderUserFullName": "string",
+    "closeOrderUser": "string",
+    "closeOrderAt": 0,
+    "closeOrderUserId": 0,
+    "closeOrderUserFullName": "string",
+    "historyStatus": "string",
+    "statusChangeHistory": [
+      {
+        "createdBy": [
+          {
+            "customerId": 0,
+            "shortName": "string",
+            "userId": "string"
+          }
+        ],
+        "date": "string",
+        "responsibleUserIds": [
+          {
+            "id": 0,
+            "shortName": "string"
+          }
+        ],
+        "statusId": 0
+      }
+    ],
+    "managerSubGroup": "string",
+    "unviewedCommentsCount": 0,
+    "hasUnviewedImportantComments": true,
+    "orderElements": [
+      {
+        "valueId": 0,
+        "elementId": 0,
+        "valueTitle": "string",
+        "elementTitle": "string"
+      }
+    ],
+    "acceptedAt": 0,
+    "isAccepted": true,
+    "routingUserId": 0,
+    "routingUserFullName": "string",
+    "routingUsersFullName": "string",
+    "routingUsersCommentary": "string",
+    "incidentId": 0,
+    "invoices": [
+      {
+        "invoiceStatusId": 0,
+        "isPaidByLK": true,
+        "totalSum": 0,
+        "creditSum": 0,
+        "paidSum": 0,
+        "refundSum": 0
+      }
+    ],
+    "hasAttachment": true,
+    "hasComments": true,
+    "isViewed": true
+  }
+]

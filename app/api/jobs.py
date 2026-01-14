@@ -85,7 +85,7 @@ async def process_job_async(job_id: str, file_path: str) -> None:
     import logging
     from app.services.excel_reader import ExcelReader, ExcelReaderError
     from app.services.split_service import SplitService
-    from app.services.expand_service import expand_rows, COMMENT_COLUMN_NAME
+    from app.services.expand_service import expand_rows
     from app.services.classify_service import ClassifyService
     from app.services.excel_writer import ExcelWriter, get_output_path
     from app.services.category_index import CategoryIndex
@@ -120,12 +120,27 @@ async def process_job_async(job_id: str, file_path: str) -> None:
             update_job_status(job_id, JobStatus.COMPLETED, progress=100, output_file=str(output_path))
             return
         
-        # Extract comments (case-insensitive column lookup)
+        # Extract comments by concatenating valueString + valueText
         def get_comment(row: dict) -> str:
+            value_string = ""
+            value_text = ""
+            
+            # Find valueString and valueText (case-insensitive)
             for key in row.keys():
-                if key.upper() == COMMENT_COLUMN_NAME.upper():
-                    return row.get(key, "") or ""
-            return ""
+                if key.upper() == "VALUESTRING":
+                    value_string = row.get(key, "") or ""
+                elif key.upper() == "VALUETEXT":
+                    value_text = row.get(key, "") or ""
+            
+            # Concatenate with space if both exist
+            if value_string and value_text:
+                return f"{value_string} {value_text}"
+            elif value_string:
+                return value_string
+            elif value_text:
+                return value_text
+            else:
+                return ""
         
         comments = [get_comment(row) for row in rows]
         
