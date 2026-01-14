@@ -1,7 +1,7 @@
 """Tests for expand_service module."""
 
 import pytest
-from app.services.expand_service import expand_rows, expand_single_row, COMMENT_COLUMN_NAME
+from app.services.expand_service import expand_rows, expand_single_row, DEFECT_COLUMN_NAME
 from app.models.schemas import ExpandedRow
 
 
@@ -11,7 +11,7 @@ class TestExpandRows:
     def test_basic_expansion(self):
         """Test basic row expansion with multiple defects."""
         rows = [
-            {"ID": "1", "NAME": "Item1", "КОММЕНТАРИЙ": "original comment"},
+            {"ID": "1", "NAME": "Item1", "valueString": "место", "valueText": "дефекты"},
         ]
         defects = [["defect A", "defect B"]]
         
@@ -22,7 +22,7 @@ class TestExpandRows:
     
     def test_row_expansion_count_req_4_1_4_4(self):
         """Requirement 4.1, 4.4: N defects creates N rows."""
-        rows = [{"ID": "1", "КОММЕНТАРИЙ": "many defects"}]
+        rows = [{"ID": "1", "valueText": "many defects"}]
         defects = [["d1", "d2", "d3", "d4", "d5"]]
         
         result = expand_rows(rows, defects)
@@ -31,7 +31,7 @@ class TestExpandRows:
     
     def test_column_copy_req_4_2(self):
         """Requirement 4.2: All original columns are copied."""
-        rows = [{"A": "1", "B": "2", "C": "3", "КОММЕНТАРИЙ": "test"}]
+        rows = [{"A": "1", "B": "2", "C": "3", "valueText": "test"}]
         defects = [["defect"]]
         
         result = expand_rows(rows, defects)
@@ -40,22 +40,22 @@ class TestExpandRows:
         assert result[0].original_data["B"] == "2"
         assert result[0].original_data["C"] == "3"
     
-    def test_comment_replaced_req_4_3(self):
-        """Requirement 4.3: КОММЕНТАРИЙ column replaced with defect text."""
-        rows = [{"ID": "1", "КОММЕНТАРИЙ": "original comment"}]
+    def test_defect_column_added_req_4_3(self):
+        """Requirement 4.3: Дефект column added with defect text."""
+        rows = [{"ID": "1", "valueText": "original comment"}]
         defects = [["new defect text"]]
         
         result = expand_rows(rows, defects)
         
-        assert result[0].original_data["КОММЕНТАРИЙ"] == "new defect text"
+        assert result[0].original_data[DEFECT_COLUMN_NAME] == "new defect text"
         assert result[0].defect_text == "new defect text"
     
     def test_multiple_rows_multiple_defects(self):
         """Test expansion with multiple rows having different defect counts."""
         rows = [
-            {"ID": "1", "КОММЕНТАРИЙ": "comment1"},
-            {"ID": "2", "КОММЕНТАРИЙ": "comment2"},
-            {"ID": "3", "КОММЕНТАРИЙ": "comment3"},
+            {"ID": "1", "valueText": "comment1"},
+            {"ID": "2", "valueText": "comment2"},
+            {"ID": "3", "valueText": "comment3"},
         ]
         defects = [
             ["d1", "d2"],      # 2 defects
@@ -78,8 +78,8 @@ class TestExpandRows:
     def test_empty_defects_skipped(self):
         """Rows with empty defect lists are skipped."""
         rows = [
-            {"ID": "1", "КОММЕНТАРИЙ": "has defects"},
-            {"ID": "2", "КОММЕНТАРИЙ": "no defects"},
+            {"ID": "1", "valueText": "has defects"},
+            {"ID": "2", "valueText": "no defects"},
         ]
         defects = [
             ["defect"],
@@ -94,8 +94,8 @@ class TestExpandRows:
     def test_all_empty_defects(self):
         """All rows with empty defects returns empty list."""
         rows = [
-            {"ID": "1", "КОММЕНТАРИЙ": "no issues"},
-            {"ID": "2", "КОММЕНТАРИЙ": "no issues"},
+            {"ID": "1", "valueText": "no issues"},
+            {"ID": "2", "valueText": "no issues"},
         ]
         defects = [[], []]
         
@@ -105,7 +105,7 @@ class TestExpandRows:
     
     def test_category_initially_none(self):
         """Category field should be None initially."""
-        rows = [{"ID": "1", "КОММЕНТАРИЙ": "test"}]
+        rows = [{"ID": "1", "valueText": "test"}]
         defects = [["defect"]]
         
         result = expand_rows(rows, defects)
@@ -114,18 +114,19 @@ class TestExpandRows:
     
     def test_original_row_not_modified(self):
         """Original row dict should not be modified."""
-        original_row = {"ID": "1", "КОММЕНТАРИЙ": "original"}
+        original_row = {"ID": "1", "valueText": "original"}
         rows = [original_row]
         defects = [["new defect"]]
         
         expand_rows(rows, defects)
         
-        # Original should be unchanged
-        assert original_row["КОММЕНТАРИЙ"] == "original"
+        # Original should be unchanged - defect added as new column
+        assert original_row["valueText"] == "original"
+        assert DEFECT_COLUMN_NAME not in original_row
     
     def test_mismatched_lengths_raises_error(self):
         """Mismatched rows and defects lengths should raise ValueError."""
-        rows = [{"ID": "1", "КОММЕНТАРИЙ": "test"}]
+        rows = [{"ID": "1", "valueText": "test"}]
         defects = [["d1"], ["d2"]]  # 2 defect lists for 1 row
         
         with pytest.raises(ValueError, match="Mismatch"):
@@ -141,7 +142,7 @@ class TestExpandSingleRow:
     
     def test_single_row_expansion(self):
         """Test expanding a single row."""
-        row = {"ID": "1", "КОММЕНТАРИЙ": "test"}
+        row = {"ID": "1", "valueText": "test"}
         defects = ["d1", "d2"]
         
         result = expand_single_row(row, defects)
@@ -152,7 +153,7 @@ class TestExpandSingleRow:
     
     def test_single_row_empty_defects(self):
         """Single row with no defects returns empty list."""
-        row = {"ID": "1", "КОММЕНТАРИЙ": "test"}
+        row = {"ID": "1", "valueText": "test"}
         
         result = expand_single_row(row, [])
         
