@@ -107,11 +107,14 @@ def _fix_json_string(json_str: str) -> str:
     # Remove trailing commas before ] or }
     json_str = re.sub(r',\s*([}\]])', r'\1', json_str)
     
-    # Fix unescaped newlines in strings
-    json_str = re.sub(r'(?<!\\)\n', r'\\n', json_str)
+    # Fix unescaped newlines in strings - REMOVED because it breaks pretty-printed structure
+    # Use json.loads(..., strict=False) instead
+    # json_str = re.sub(r'(?<!\\)\n', r'\\n', json_str)
     
-    # Remove control characters
-    json_str = re.sub(r'[\x00-\x1f\x7f-\x9f]', '', json_str)
+    # Remove control characters (excluding newlines, tabs, carriage returns)
+    # \x00-\x1f includes \n(0a), \r(0d), \t(09)
+    # We want to keep structural whitespace
+    json_str = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\x9f]', '', json_str)
     
     return json_str
 
@@ -240,9 +243,9 @@ class LLMClient:
     
     def _build_split_prompt(self, comments: list[str]) -> list[dict]:
         """Build prompt for splitting comments into defects."""
-        # Replace newlines with spaces to avoid confusion in prompt numbering
-        comments_text = "\n".join(
-            f"[{i+1}] {comment.replace(chr(10), ' ').replace(chr(13), ' ')}" 
+        # Use a more structured format preserving newlines
+        comments_text = "\n\n".join(
+            f"ID: {i+1}\nCONTENT:\n{comment}"
             for i, comment in enumerate(comments)
         )
         
@@ -250,36 +253,59 @@ class LLMClient:
 
 ЗАДАЧА: Разделить каждый комментарий на ОТДЕЛЬНЫЕ дефекты.
 
+ФОРМАТ ВХОДНЫХ ДАННЫХ:
+ID: номер
+CONTENT:
+текст комментария (может быть многострочным)
+
 ПРАВИЛА РАЗДЕЛЕНИЯ:
-1. Номер в начале текста (1, 2, 3 или 1., 2., 3. или 1Текст 2Текст) = НОВЫЙ ДЕФЕКТ
-2. Точка с запятой (;) = НОВЫЙ ДЕФЕКТ  
+1. Номер в начале строки или предложения (1, 2, 3 или 1., 2., 3. или 1Текст 2Текст) = НОВЫЙ ДЕФЕКТ
+2. Точка с запятой (;) = НОВЫЙ ДЕФЕКТ
 3. Убирай номера из начала (1Царапины → Царапины)
 4. Если текст БЕЗ номеров и БЕЗ разделителей = ОДИН дефект
 5. "нет замечаний" или пустой текст = пустой список []
-6. Слово "Окно" или "Окно 1" БЕЗ описания дефекта = пустой список []
+6. Заголовки типа "Окно 2" или "Кухня":
+   - Если после заголовка идут дефекты -> ИГНОРИРОВАТЬ заголовок, извлекать только дефекты
+   - Если КРОМЕ заголовка ничего нет -> пустой список []
 
 ПРИМЕРЫ:
 
-Вход: "Окно 2 1Царапины на откосах 2Отслоение резинки 3Зазоры в углах"
+Вход:
+ID: 1
+CONTENT:
+Окно 2
+1Царапины на откосах
+2Отслоение резинки
+3Зазоры в углах
+
 Выход: {"defects": [{"text": "Царапины на откосах"}, {"text": "Отслоение резинки"}, {"text": "Зазоры в углах"}]}
 
-Вход: "Стеклопакет ПВХ: поврежден (трещина)"
+Вход:
+ID: 2
+CONTENT:
+Стеклопакет ПВХ: поврежден (трещина)
+
 Выход: {"defects": [{"text": "Стеклопакет ПВХ: поврежден (трещина)"}]}
 
-Вход: "Окно"
+Вход:
+ID: 3
+CONTENT:
+Окно
+
 Выход: {"defects": []}
 
-Вход: "Окно 1 (слева на право)"
-Выход: {"defects": []}
+Вход:
+ID: 4
+CONTENT:
+Окно 1 (слева на право)
 
-Вход: "1. Царапины 2. Трещина 3. Загрязнения"
-Выход: {"defects": [{"text": "Царапины"}, {"text": "Трещина"}, {"text": "Загрязнения"}]}
+Выход: {"defects": []}
 
 ФОРМАТ ОТВЕТА (строго JSON):
 {
   "results": [
-    {"defects": [...]},
-    {"defects": [...]},
+    {"defects": [...]},  // Для ID: 1
+    {"defects": [...]},  // Для ID: 2
     ...
   ]
 }
@@ -368,11 +394,12 @@ class LLMClient:
             
             # Try to parse, if fails try to fix
             try:
-                data = json.loads(json_str)
+                # Use strict=False to allow control characters (newlines) in strings
+                data = json.loads(json_str, strict=False)
             except json.JSONDecodeError:
                 logger.warning("Initial JSON parse failed, attempting to fix...")
                 json_str = _fix_json_string(json_str)
-                data = json.loads(json_str)
+                data = json.loads(json_str, strict=False)
             
             results = data.get("results", [])
             
@@ -431,11 +458,11 @@ class LLMClient:
             
             # Try to parse, if fails try to fix
             try:
-                data = json.loads(json_str)
+                data = json.loads(json_str, strict=False)
             except json.JSONDecodeError:
                 logger.warning("Initial JSON parse failed, attempting to fix...")
                 json_str = _fix_json_string(json_str)
-                data = json.loads(json_str)
+                data = json.loads(json_str, strict=False)
             
             results = data.get("results", [])
             
