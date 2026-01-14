@@ -145,10 +145,10 @@ async def process_job_async(job_id: str, file_path: str) -> None:
         
         comments = [get_comment(row) for row in rows]
         
-        # Log first few comments for debugging - FULL TEXT
-        logger.info(f"Job {job_id}: First 3 comments to split (FULL):")
-        for i, comment in enumerate(comments[:3]):
-            logger.info(f"  Comment {i+1} (len={len(comment)}): {comment}")
+        # Log ALL comments for debugging - FULL TEXT
+        logger.info(f"Job {job_id}: ALL {len(comments)} comments to split:")
+        for i, comment in enumerate(comments):
+            logger.info(f"  Comment {i} (len={len(comment)}): {comment[:200]}{'...' if len(comment) > 200 else ''}")
         
         # Log ALL rows with valueString and valueText
         if rows:

@@ -519,6 +519,7 @@ class LLMClient:
             logger.info(f"Calling LLM API for batch {batch_num}...")
             response = await self._call_api(messages)
             logger.info(f"Batch {batch_num} response received, parsing...")
+            logger.info(f"Raw LLM response (first 2000 chars): {response[:2000]}")
             batch_results = self._parse_split_response(response, len(batch))
             all_results.extend(batch_results)
             logger.info(f"Batch {batch_num} complete")
