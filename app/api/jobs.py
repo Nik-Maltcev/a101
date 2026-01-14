@@ -150,15 +150,16 @@ async def process_job_async(job_id: str, file_path: str) -> None:
         for i, comment in enumerate(comments[:3]):
             logger.info(f"  Comment {i+1} (len={len(comment)}): {comment}")
         
-        # Log ALL columns and values for first row to debug
+        # Log ALL rows with valueString and valueText
         if rows:
-            first_row = rows[0]
-            logger.info(f"Job {job_id}: === FIRST ROW DEBUG ===")
-            logger.info(f"Job {job_id}: All columns: {list(first_row.keys())}")
-            for key, value in first_row.items():
-                val_str = str(value) if value else "(empty)"
-                val_repr = repr(value) if value else "(None)"
-                logger.info(f"Job {job_id}:   '{key}' = {val_repr[:200]}")
+            logger.info(f"Job {job_id}: === ALL ROWS DEBUG ===")
+            logger.info(f"Job {job_id}: Columns: {list(rows[0].keys())}")
+            for i, row in enumerate(rows):
+                vs = row.get('valueString') or row.get('ValueString') or ''
+                vt = row.get('valueText') or row.get('ValueText') or ''
+                vs_len = len(str(vs)) if vs else 0
+                vt_len = len(str(vt)) if vt else 0
+                logger.info(f"Job {job_id}: Row {i}: valueString({vs_len})='{str(vs)[:50]}' | valueText({vt_len})='{str(vt)[:100]}'")
         
         # Step 2: Split comments
         logger.info(f"Job {job_id}: Splitting {len(comments)} comments")
