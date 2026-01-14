@@ -240,8 +240,10 @@ class LLMClient:
     
     def _build_split_prompt(self, comments: list[str]) -> list[dict]:
         """Build prompt for splitting comments into defects."""
+        # Replace newlines with spaces to avoid confusion in prompt numbering
         comments_text = "\n".join(
-            f"{i+1}. {comment}" for i, comment in enumerate(comments)
+            f"{i+1}. {comment.replace(chr(10), ' ').replace(chr(13), ' ')}" 
+            for i, comment in enumerate(comments)
         )
         
         system_prompt = """Ты - эксперт по анализу комментариев о дефектах в строительстве. 
