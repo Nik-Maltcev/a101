@@ -48,12 +48,42 @@ def _extract_json_from_text(text: str) -> str:
     if code_block_match:
         return code_block_match.group(1)
     
-    # Try to find raw JSON object with results array
-    json_match = re.search(r'\{\s*"results"\s*:\s*\[.*?\]\s*\}', text, re.DOTALL)
-    if json_match:
-        return json_match.group(0)
+    # Try to find complete JSON object with results array
+    # Look for the LAST occurrence of {"results": to handle reasoning text before JSON
+    results_start = text.rfind('{"results":')
+    if results_start == -1:
+        results_start = text.rfind('{ "results":')
     
-    # Last resort: find anything that looks like JSON
+    if results_start != -1:
+        # Find matching closing brace
+        brace_count = 0
+        in_string = False
+        escape_next = False
+        
+        for i in range(results_start, len(text)):
+            char = text[i]
+            
+            if escape_next:
+                escape_next = False
+                continue
+            
+            if char == '\\':
+                escape_next = True
+                continue
+            
+            if char == '"':
+                in_string = not in_string
+                continue
+            
+            if not in_string:
+                if char == '{':
+                    brace_count += 1
+                elif char == '}':
+                    brace_count -= 1
+                    if brace_count == 0:
+                        return text[results_start:i+1]
+    
+    # Fallback: find anything that looks like JSON
     brace_start = text.find('{')
     brace_end = text.rfind('}')
     if brace_start != -1 and brace_end != -1 and brace_end > brace_start:
