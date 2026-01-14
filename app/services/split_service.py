@@ -65,6 +65,42 @@ class SplitService:
         """Compute hash for a comment string."""
         return hashlib.sha256(comment.encode("utf-8")).hexdigest()
     
+    @staticmethod
+    def _clean_defect_text(text: str) -> str:
+        """
+        Clean defect text by removing leading numbering and whitespace.
+
+        Handles:
+        - "1. Text", "1) Text", "1 Text"
+        - "1Text" (if Text starts with uppercase)
+        - "- Text", "* Text"
+        """
+        if not text:
+            return ""
+
+        cleaned = text.strip()
+
+        # Pattern explanation:
+        # ^(\d{1,3}([\.\)]\s*|\s+|(?=[A-ZА-ЯЁ])))
+        # \d{1,3} : 1 to 3 digits (avoid stripping large numbers like 2024)
+        # ( ... ) : Group defining what follows
+        #   [\.\)]\s* : Dot or paren, then optional space (e.g., "1.", "1) ")
+        #   | : OR
+        #   \s+ : At least one space (e.g., "1 Text")
+        #   | : OR
+        #   (?=[A-ZА-ЯЁ]) : Lookahead for uppercase letter (e.g., "1Text")
+
+        # Also handle bullets: ^[\-\*]\s+
+
+        # Combine:
+        # Numbering pattern
+        cleaned = re.sub(r'^(\d{1,3}([\.\)]\s*|\s+|(?=[A-ZА-ЯЁ])))', '', cleaned)
+
+        # Bullet pattern
+        cleaned = re.sub(r'^[\-\*]\s+', '', cleaned)
+
+        return cleaned.strip()
+
     def _is_empty_comment(self, comment: str) -> bool:
         """
         Check if comment should be treated as empty (no defects).
@@ -208,7 +244,7 @@ class SplitService:
             for i, (original_idx, comment) in enumerate(comments_to_process):
                 if i < len(llm_results):
                     split_result = llm_results[i]
-                    defect_texts = [d.text for d in split_result.defects]
+                    defect_texts = [self._clean_defect_text(d.text) for d in split_result.defects]
                 else:
                     # Fallback if LLM returned fewer results
                     defect_texts = []
