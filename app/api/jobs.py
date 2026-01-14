@@ -144,6 +144,11 @@ async def process_job_async(job_id: str, file_path: str) -> None:
         
         comments = [get_comment(row) for row in rows]
         
+        # Log first few comments for debugging
+        logger.info(f"Job {job_id}: First 3 comments to split:")
+        for i, comment in enumerate(comments[:3]):
+            logger.info(f"  Comment {i+1}: {comment[:200]}...")
+        
         # Step 2: Split comments
         logger.info(f"Job {job_id}: Splitting {len(comments)} comments")
         update_job_status(job_id, JobStatus.SPLITTING, progress=10)
