@@ -27,7 +27,7 @@ from app.services.classify_service import (
 from app.services.expand_service import (
     expand_rows,
     expand_single_row,
-    COMMENT_COLUMN_NAME,
+    DEFECT_COLUMN_NAME,
 )
 from app.services.excel_writer import (
     ExcelWriter,
@@ -52,7 +52,7 @@ __all__ = [
     "ClassifyServiceError",
     "expand_rows",
     "expand_single_row",
-    "COMMENT_COLUMN_NAME",
+    "DEFECT_COLUMN_NAME",
     "ExcelWriter",
     "ExcelWriterError",
     "get_output_path",

@@ -21,11 +21,9 @@ class ExcelReader:
     
     Implements Requirements 2.1, 2.2, 2.3:
     - Opens XLSX files using openpyxl
-    - Finds the "Суть обращения" column by name
+    - Finds the "valueString" and "valueText" columns
     - Extracts all data rows
     """
-    
-    COMMENT_COLUMN_NAME = "Суть обращения"
     
     def read_file(self, file_path: str | Path) -> list[dict]:
         """Read xlsx file and return list of rows as dictionaries.
@@ -89,17 +87,7 @@ class ExcelReader:
         Returns:
             Column index (0-based) or None if not found
         """
-        first_row = next(sheet.iter_rows(min_row=1, max_row=1, values_only=True), None)
-        
-        if first_row is None:
-            return None
-        
-        for idx, cell_value in enumerate(first_row):
-            if cell_value is not None:
-                # Case-insensitive comparison
-                if str(cell_value).strip().upper() == self.COMMENT_COLUMN_NAME.upper():
-                    return idx
-        
+        # This method is deprecated but kept for backwards compatibility
         return None
     
     def _get_headers(self, sheet: Worksheet) -> list[str]:
