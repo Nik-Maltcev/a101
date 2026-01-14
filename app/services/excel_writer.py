@@ -91,25 +91,34 @@ class ExcelWriter:
     ) -> list[str]:
         """Determine the column headers for output file.
         
-        Headers include all original columns plus "Категория дефекта".
+        Headers order: original columns + "Дефект" + "Категория дефекта"
         
         Args:
             rows: List of ExpandedRow objects
-            original_headers: Optional predefined header order
+            original_headers: Optional predefined header order from source file
             
         Returns:
-            List of header names including category column
+            List of header names in correct order
         """
         if original_headers:
+            # Use original headers as base
             headers = list(original_headers)
         elif rows:
             # Extract headers from first row's original_data
-            headers = list(rows[0].original_data.keys())
+            # Filter out added columns (Дефект, Категория дефекта)
+            headers = [
+                h for h in rows[0].original_data.keys()
+                if h not in ["Дефект", self.CATEGORY_COLUMN_NAME]
+            ]
         else:
-            # Empty result - just return category column
-            return [self.CATEGORY_COLUMN_NAME]
+            # Empty result
+            headers = []
         
-        # Add category column if not present
+        # Add "Дефект" column if not already present
+        if "Дефект" not in headers:
+            headers.append("Дефект")
+        
+        # Add category column at the end if not present
         if self.CATEGORY_COLUMN_NAME not in headers:
             headers.append(self.CATEGORY_COLUMN_NAME)
         
