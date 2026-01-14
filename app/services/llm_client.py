@@ -107,10 +107,6 @@ def _fix_json_string(json_str: str) -> str:
     # Remove trailing commas before ] or }
     json_str = re.sub(r',\s*([}\]])', r'\1', json_str)
     
-    # Fix unescaped newlines in strings - REMOVED because it breaks pretty-printed structure
-    # Use json.loads(..., strict=False) instead
-    # json_str = re.sub(r'(?<!\\)\n', r'\\n', json_str)
-    
     # Remove control characters (excluding newlines, tabs, carriage returns)
     # \x00-\x1f includes \n(0a), \r(0d), \t(09)
     # We want to keep structural whitespace
@@ -279,49 +275,32 @@ CONTENT:
 2Отслоение резинки
 3Зазоры в углах
 
-Выход: {"defects": [{"text": "Царапины на откосах"}, {"text": "Отслоение резинки"}, {"text": "Зазоры в углах"}]}
-
-Вход:
-ID: 5
-CONTENT:
-Окно 2
-1. Царапины
-2. Отслоение
-3. Зазоры
-
-Выход: {"defects": [{"text": "Царапины"}, {"text": "Отслоение"}, {"text": "Зазоры"}]}
+Выход: {"results": [["Царапины на откосах", "Отслоение резинки", "Зазоры в углах"]]}
 
 Вход:
 ID: 2
 CONTENT:
 Стеклопакет ПВХ: поврежден (трещина)
 
-Выход: {"defects": [{"text": "Стеклопакет ПВХ: поврежден (трещина)"}]}
+Выход: {"results": [["Стеклопакет ПВХ: поврежден (трещина)"]]}
 
 Вход:
 ID: 3
 CONTENT:
 Окно
 
-Выход: {"defects": []}
-
-Вход:
-ID: 4
-CONTENT:
-Окно 1 (слева на право)
-
-Выход: {"defects": []}
+Выход: {"results": [[]]}
 
 ФОРМАТ ОТВЕТА (строго JSON):
 {
   "results": [
-    {"defects": [...]},  // Для ID: 1
-    {"defects": [...]},  // Для ID: 2
+    ["дефект 1", "дефект 2"], // Для ID 1
+    ["дефект 1"],             // Для ID 2
     ...
   ]
 }
 
-Количество элементов в results ДОЛЖНО РАВНЯТЬСЯ количеству входных комментариев!"""
+Количество списков в results ДОЛЖНО РАВНЯТЬСЯ количеству входных комментариев!"""
 
         user_prompt = f"""Разделите каждый комментарий на отдельные дефекты.
 
@@ -421,16 +400,21 @@ CONTENT:
                 )
                 # Pad with empty results if needed
                 while len(results) < expected_count:
-                    results.append({"defects": []})
+                    results.append([])
                 # Truncate if too many
                 results = results[:expected_count]
             
             parsed_results = []
             for idx, item in enumerate(results):
+                # Ensure item is a list of strings
+                if not isinstance(item, list):
+                    logger.warning(f"Result {idx} is not a list: {item}")
+                    item = [] if not item else [str(item)]
+
                 defects = [
-                    DefectItem(text=d.get("text", ""))
-                    for d in item.get("defects", [])
-                    if d.get("text", "").strip()  # Skip empty defects
+                    DefectItem(text=str(d))
+                    for d in item
+                    if str(d).strip()  # Skip empty defects
                 ]
                 parsed_results.append(SplitResult(defects=defects))
                 # Log parsed defects for debugging
