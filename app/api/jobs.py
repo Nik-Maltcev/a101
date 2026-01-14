@@ -133,9 +133,9 @@ async def process_job_async(job_id: str, file_path: str) -> None:
                 elif key_upper == "VALUETEXT":
                     value_text = row.get(key, "") or ""
             
-            # Concatenate with space if both exist
+            # Concatenate with newline if both exist
             if value_string and value_text:
-                return f"{value_string} {value_text}"
+                return f"{value_string}\n{value_text}"
             elif value_string:
                 return value_string
             elif value_text:
