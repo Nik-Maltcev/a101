@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     STATIC_DIR: Path = BASE_DIR / "static"
     
     # Categories reference file
-    CATEGORIES_FILE: Path = DATA_DIR / "categories.xlsx"
+    CATEGORIES_FILE: Path = DATA_DIR / "categories1.xlsx"
     
     # Redis configuration
     REDIS_URL: str = "redis://localhost:6379/0"
@@ -33,7 +33,7 @@ class Settings(BaseSettings):
     # Processing settings
     SPLIT_BATCH_SIZE: int = 30
     CLASSIFY_BATCH_SIZE: int = 10
-    CATEGORY_TOP_N: int = 25  # Not used anymore, keeping for compatibility
+    CATEGORY_TOP_N: int = 40  # Increased for 579 categories - rapidfuzz finds top candidates
     
     # File settings
     MAX_FILE_SIZE: int = 50 * 1024 * 1024  # 50 MB
