@@ -61,6 +61,12 @@ def expand_rows(
             # Copy all original columns
             original_data = row.copy()
             
+            # Replace valueText with individual defect text (not the full original)
+            # This ensures each row has only its specific defect in valueText
+            for key in list(original_data.keys()):
+                if key.upper() == "VALUETEXT":
+                    original_data[key] = defect_text
+            
             # Add defect column with defect text
             original_data[defect_column] = defect_text
             
