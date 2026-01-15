@@ -92,14 +92,116 @@ class SplitService:
 
         # Also handle bullets: ^[\-\*]\s+
 
-        # Combine:
-        # Numbering pattern
-        cleaned = re.sub(r'^(\d{1,3}([\.\)]\s*|\s+|(?=[A-ZА-ЯЁ])))', '', cleaned)
+        # Only strip number prefix if remaining text is long enough (>5 chars)
+        # This prevents stripping "5шт" -> "шт"
+        
+        # First try explicit separators (always strip)
+        if re.match(r'^\d{1,3}[\.\)]\s*', cleaned):
+            cleaned = re.sub(r'^\d{1,3}[\.\)]\s*', '', cleaned)
+        elif re.match(r'^\d{1,3}\s+', cleaned):
+            cleaned = re.sub(r'^\d{1,3}\s+', '', cleaned)
+        # For "1Text" pattern (no separator), only strip if result is long enough
+        elif re.match(r'^\d{1,3}(?=[A-ZА-ЯЁа-яё])', cleaned):
+            potential_result = re.sub(r'^\d{1,3}', '', cleaned)
+            if len(potential_result) > 5:  # Only strip if remaining text is substantial
+                cleaned = potential_result
 
         # Bullet pattern
         cleaned = re.sub(r'^[\-\*]\s+', '', cleaned)
 
         return cleaned.strip()
+
+    @staticmethod
+    def _local_split_by_numbers(text: str) -> list[str]:
+        """
+        Fallback: split text by numbered lines locally without LLM.
+        
+        Handles multiline text where each line starts with a number.
+        """
+        if not text:
+            return []
+        
+        lines = text.strip().split('\n')
+        defects = []
+        current_defect = []
+        
+        # Pattern to detect numbered lines: starts with digit(s) followed by text
+        number_pattern = re.compile(r'^(\d{1,2})([\.\)\s]|(?=[А-ЯЁа-яёA-Za-z]))')
+        
+        # Check if this looks like a header (e.g., "Окно 2", "Кухня")
+        header_pattern = re.compile(r'^(Окно|Кухня|Комната|Балкон|Лоджия|Санузел|Ванная|Коридор|Прихожая)\s*\d*', re.IGNORECASE)
+        
+        for line in lines:
+            line = line.strip()
+            if not line:
+                continue
+            
+            # Skip headers
+            if header_pattern.match(line) and len(line) < 50:
+                continue
+            
+            # Check if line starts with a number
+            if number_pattern.match(line):
+                # Save previous defect if exists
+                if current_defect:
+                    defect_text = ' '.join(current_defect)
+                    cleaned = SplitService._clean_defect_text(defect_text)
+                    if cleaned:
+                        defects.append(cleaned)
+                    current_defect = []
+                
+                # Start new defect
+                current_defect.append(line)
+            else:
+                # Continue current defect or start new one
+                if current_defect:
+                    current_defect.append(line)
+                else:
+                    # Non-numbered line without context - treat as single defect
+                    cleaned = SplitService._clean_defect_text(line)
+                    if cleaned:
+                        defects.append(cleaned)
+        
+        # Don't forget the last defect
+        if current_defect:
+            defect_text = ' '.join(current_defect)
+            cleaned = SplitService._clean_defect_text(defect_text)
+            if cleaned:
+                defects.append(cleaned)
+        
+        return defects
+
+    def _validate_split_result(self, comment: str, defects: list[str]) -> list[str]:
+        """
+        Validate split result and apply fallback if needed.
+        
+        Checks for:
+        - All defects being identical (LLM error)
+        - Defects being just numbers
+        - Empty results when input has numbered lines
+        """
+        if not defects:
+            # Check if input has numbered lines - try local split
+            if re.search(r'\n\s*\d{1,2}[\.\)\s]', comment) or re.search(r'\n\s*\d{1,2}[А-ЯЁа-яё]', comment):
+                logger.warning("LLM returned empty but input has numbered lines, trying local split")
+                return self._local_split_by_numbers(comment)
+            return defects
+        
+        # Check if all defects are identical
+        unique_defects = set(defects)
+        if len(unique_defects) == 1 and len(defects) > 1:
+            logger.warning(f"All {len(defects)} defects are identical: '{defects[0][:50]}...', trying local split")
+            local_result = self._local_split_by_numbers(comment)
+            if local_result and len(set(local_result)) > 1:
+                return local_result
+        
+        # Check if defects are just numbers or very short
+        valid_defects = [d for d in defects if len(d) > 3 and not d.isdigit()]
+        if len(valid_defects) < len(defects):
+            logger.warning(f"Filtered out {len(defects) - len(valid_defects)} invalid defects (too short or just numbers)")
+            return valid_defects
+        
+        return defects
 
     def _is_empty_comment(self, comment: str) -> bool:
         """
@@ -245,10 +347,13 @@ class SplitService:
                 if i < len(llm_results):
                     split_result = llm_results[i]
                     defect_texts = [self._clean_defect_text(d.text) for d in split_result.defects]
+                    
+                    # Validate and potentially fix the result
+                    defect_texts = self._validate_split_result(comment, defect_texts)
                 else:
                     # Fallback if LLM returned fewer results
-                    defect_texts = []
-                    logger.warning(f"No LLM result for comment {original_idx}")
+                    defect_texts = self._local_split_by_numbers(comment)
+                    logger.warning(f"No LLM result for comment {original_idx}, used local split: {len(defect_texts)} defects")
                 
                 results[original_idx] = defect_texts
                 self._store_in_cache(comment, defect_texts)
