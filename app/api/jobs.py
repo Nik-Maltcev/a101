@@ -159,7 +159,9 @@ async def process_job_async(job_id: str, file_path: str) -> None:
                 vt = row.get('valueText') or row.get('ValueText') or ''
                 vs_len = len(str(vs)) if vs else 0
                 vt_len = len(str(vt)) if vt else 0
-                logger.info(f"Job {job_id}: Row {i}: valueString({vs_len})='{str(vs)[:50]}' | valueText({vt_len})='{str(vt)[:100]}'")
+                # Show newlines explicitly in log
+                vt_preview = str(vt)[:200].replace('\n', '\\n').replace('\r', '\\r') if vt else ''
+                logger.info(f"Job {job_id}: Row {i}: valueString({vs_len})='{str(vs)[:50]}' | valueText({vt_len})='{vt_preview}'")
         
         # Step 2: Split comments
         logger.info(f"Job {job_id}: Splitting {len(comments)} comments")
