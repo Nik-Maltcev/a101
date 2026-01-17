@@ -178,7 +178,7 @@ class ClassifyService:
             
             # Get top-N candidate categories for each defect using rapidfuzz
             defects_with_candidates: list[dict] = []
-            for original_idx, defect in defects_to_process:
+            for idx, (original_idx, defect) in enumerate(defects_to_process):
                 # Find top-N most similar categories
                 candidates = self.category_index.find_top_n(defect, n=self.top_n)
                 
@@ -190,6 +190,10 @@ class ClassifyService:
                     "defect": defect,
                     "candidates": candidates,
                 })
+                
+                # Log candidates for first few defects for debugging
+                if idx < 3:
+                    logger.info(f"Defect {original_idx}: '{defect[:60]}...' -> top 5 candidates: {candidates[:5]}")
             
             logger.info(f"Found top-{self.top_n} candidates for each defect using rapidfuzz")
             
@@ -199,6 +203,12 @@ class ClassifyService:
             # Map results back and cache them
             all_categories = self.category_index.categories
             
+            # List of invalid responses that LLM might return
+            invalid_responses = {
+                'другое', 'прочее', 'иное', 'не подходит', 'нет категории',
+                'не найдено', 'отсутствует', 'none', 'other', ''
+            }
+            
             for i, (original_idx, defect) in enumerate(defects_to_process):
                 if i < len(llm_results):
                     classify_result = llm_results[i]
@@ -207,25 +217,50 @@ class ClassifyService:
                     # Get candidates for this defect
                     candidates = defects_with_candidates[i]["candidates"]
                     
-                    # Validate: category must be in candidates list
-                    if category not in candidates:
+                    # Check if LLM returned invalid/invented category
+                    category_lower = category.lower().strip() if category else ''
+                    is_invalid = (
+                        category_lower in invalid_responses or
+                        category not in candidates
+                    )
+                    
+                    if is_invalid:
                         logger.warning(
-                            f"LLM returned category '{category}' not in candidates for defect {original_idx}. "
-                            f"Using best match from candidates."
+                            f"LLM returned invalid category '{category}' for defect {original_idx}. "
+                            f"Selecting best match from candidates."
                         )
-                        # Find closest match from candidates
+                        # Find closest match from candidates using fuzzy matching
                         from rapidfuzz import process as rfprocess, fuzz as rffuzz
-                        best_match = rfprocess.extractOne(
-                            defect,
-                            [c for c in candidates if c != "НЕ ОПРЕДЕЛЕНО"],
-                            scorer=rffuzz.token_set_ratio
-                        )
-                        if best_match and best_match[1] > 30:
-                            category = best_match[0]
-                            logger.info(f"Selected closest match: '{category}' (score: {best_match[1]})")
+                        
+                        # Filter out "НЕ ОПРЕДЕЛЕНО" from candidates for matching
+                        valid_candidates = [c for c in candidates if c != "НЕ ОПРЕДЕЛЕНО"]
+                        
+                        if valid_candidates:
+                            best_match = rfprocess.extractOne(
+                                defect,
+                                valid_candidates,
+                                scorer=rffuzz.token_set_ratio
+                            )
+                            if best_match and best_match[1] > 30:
+                                category = best_match[0]
+                                logger.info(f"Selected closest match: '{category}' (score: {best_match[1]})")
+                            else:
+                                # Try WRatio as fallback
+                                best_match = rfprocess.extractOne(
+                                    defect,
+                                    valid_candidates,
+                                    scorer=rffuzz.WRatio
+                                )
+                                if best_match and best_match[1] > 30:
+                                    category = best_match[0]
+                                    logger.info(f"Selected WRatio match: '{category}' (score: {best_match[1]})")
+                                else:
+                                    # Use first candidate as last resort
+                                    category = valid_candidates[0]
+                                    logger.warning(f"Using first candidate as fallback: '{category}'")
                         else:
                             category = "НЕ ОПРЕДЕЛЕНО"
-                            logger.warning(f"No good match found for defect {original_idx}")
+                            logger.warning(f"No valid candidates for defect {original_idx}")
                 else:
                     # Fallback if LLM returned fewer results
                     category = "НЕ ОПРЕДЕЛЕНО"

@@ -130,8 +130,8 @@ class CategoryIndex:
     def find_top_n(self, text: str, n: int = 10) -> list[str]:
         """Find the N most similar categories for the given text.
         
-        Uses fuzzy string matching to find categories that best match
-        the input text.
+        Uses multiple fuzzy string matching strategies to find categories 
+        that best match the input text.
         
         Args:
             text: The defect text to match against categories
@@ -143,6 +143,9 @@ class CategoryIndex:
         Raises:
             CategoryIndexError: If index is not built
         """
+        import logging
+        logger = logging.getLogger(__name__)
+        
         if not self._index_built:
             raise CategoryIndexError(
                 "Index not built. Call build_index() first."
@@ -157,39 +160,118 @@ class CategoryIndex:
         
         query = text.strip().lower()
         
-        # Use token_set_ratio for better matching of partial phrases
-        # It handles word order and partial matches better than WRatio
-        results = process.extract(
+        # Extract key words from query for better matching
+        # Common construction terms to look for
+        key_terms = self._extract_key_terms(query)
+        
+        # Strategy 1: token_set_ratio - good for word overlap regardless of order
+        results_token_set = process.extract(
             query=query,
             choices=self._categories,
             scorer=fuzz.token_set_ratio,
-            limit=n * 2  # Get more candidates initially
+            limit=n * 2
         )
         
-        # Also try partial_ratio for substring matches
-        partial_results = process.extract(
+        # Strategy 2: partial_ratio - good for substring matches
+        results_partial = process.extract(
             query=query,
             choices=self._categories,
             scorer=fuzz.partial_ratio,
             limit=n
         )
         
-        # Combine and deduplicate results, prioritizing higher scores
-        seen = set()
-        combined = []
+        # Strategy 3: WRatio - weighted ratio, good general purpose
+        results_wratio = process.extract(
+            query=query,
+            choices=self._categories,
+            scorer=fuzz.WRatio,
+            limit=n
+        )
         
-        # Merge both result sets
-        all_results = list(results) + list(partial_results)
-        all_results.sort(key=lambda x: x[1], reverse=True)
+        # Strategy 4: Search by key terms if found
+        term_matches = []
+        if key_terms:
+            for term in key_terms:
+                term_results = process.extract(
+                    query=term,
+                    choices=self._categories,
+                    scorer=fuzz.partial_ratio,
+                    limit=n // 2
+                )
+                term_matches.extend(term_results)
         
-        for match, score, idx in all_results:
-            if match not in seen:
-                seen.add(match)
-                combined.append(match)
-                if len(combined) >= n:
-                    break
+        # Combine all results with weighted scoring
+        score_map = {}
         
-        return combined
+        # Weight: token_set_ratio results (best for construction defects)
+        for match, score, idx in results_token_set:
+            if match not in score_map:
+                score_map[match] = 0
+            score_map[match] += score * 1.2  # Higher weight
+        
+        # Weight: partial_ratio results
+        for match, score, idx in results_partial:
+            if match not in score_map:
+                score_map[match] = 0
+            score_map[match] += score * 1.0
+        
+        # Weight: WRatio results
+        for match, score, idx in results_wratio:
+            if match not in score_map:
+                score_map[match] = 0
+            score_map[match] += score * 0.8
+        
+        # Weight: term matches (bonus for key term matches)
+        for match, score, idx in term_matches:
+            if match not in score_map:
+                score_map[match] = 0
+            score_map[match] += score * 0.5  # Bonus
+        
+        # Sort by combined score
+        sorted_matches = sorted(score_map.items(), key=lambda x: x[1], reverse=True)
+        
+        # Take top N
+        result = [match for match, score in sorted_matches[:n]]
+        
+        # Log for debugging (first few defects only)
+        if len(query) < 100:
+            logger.debug(f"Fuzzy search for '{query[:50]}...': top 5 = {result[:5]}")
+        
+        return result
+    
+    def _extract_key_terms(self, text: str) -> list[str]:
+        """Extract key construction terms from text for better matching."""
+        # Common construction terms in Russian
+        key_patterns = [
+            'окно', 'окон', 'оконн', 'стеклопакет', 'рама', 'пвх', 'створк',
+            'дверь', 'двер', 'входн',
+            'стен', 'стена', 'кладк', 'штукатурк',
+            'пол', 'полов', 'ламинат', 'плитк', 'паркет',
+            'потолок', 'потолоч',
+            'электр', 'розетк', 'выключател', 'провод', 'кабел',
+            'водоснабж', 'канализац', 'сантехник', 'труб', 'кран', 'смесител',
+            'отоплен', 'радиатор', 'батаре',
+            'вентиляц', 'кондиционер',
+            'балкон', 'лоджи',
+            'царапин', 'трещин', 'скол', 'повреждени', 'дефект',
+            'загрязнен', 'пятн',
+            'протечк', 'влаг',
+            'зазор', 'щел', 'неплотн',
+            'откос', 'подоконник', 'отлив',
+            'уплотнител', 'резинк', 'герметик',
+            'фурнитур', 'ручк', 'петл', 'замок',
+            'монтаж', 'установк',
+            'обои', 'покраск', 'краск',
+        ]
+        
+        found_terms = []
+        text_lower = text.lower()
+        
+        for pattern in key_patterns:
+            if pattern in text_lower:
+                found_terms.append(pattern)
+        
+        return found_terms[:5]  # Limit to 5 most relevant terms
     
     def check_and_rebuild(self) -> bool:
         """Check if the categories file has changed and rebuild if needed.
