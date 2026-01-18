@@ -108,9 +108,28 @@ def _fix_json_string(json_str: str) -> str:
     json_str = re.sub(r',\s*([}\]])', r'\1', json_str)
     
     # Remove control characters (excluding newlines, tabs, carriage returns)
-    # \x00-\x1f includes \n(0a), \r(0d), \t(09)
-    # We want to keep structural whitespace
     json_str = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\x9f]', '', json_str)
+    
+    # Fix unescaped newlines inside strings (common LLM error)
+    # This is tricky - we need to be careful not to break valid JSON
+    
+    # Remove any text after the closing brace of the JSON object
+    last_brace = json_str.rfind('}')
+    if last_brace != -1:
+        json_str = json_str[:last_brace + 1]
+    
+    # Remove any text before the opening brace
+    first_brace = json_str.find('{')
+    if first_brace != -1:
+        json_str = json_str[first_brace:]
+    
+    # Fix common issue: missing quotes around keys
+    json_str = re.sub(r'(\{|\,)\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*:', r'\1"\2":', json_str)
+    
+    # Fix single quotes to double quotes (but be careful with apostrophes in text)
+    # Only do this if there are no double quotes at all
+    if '"' not in json_str and "'" in json_str:
+        json_str = json_str.replace("'", '"')
     
     return json_str
 
@@ -166,20 +185,23 @@ class LLMClient:
             await self._client.aclose()
             self._client = None
 
-    async def _call_api(self, messages: list[dict], use_json_format: bool = True) -> str:
+    async def _call_api(self, messages: list[dict], use_json_format: bool = True, max_retries: int = 3) -> str:
         """
-        Make a call to the LLM API.
+        Make a call to the LLM API with automatic retries.
         
         Args:
             messages: List of message dicts with role and content
             use_json_format: Whether to request JSON response format
+            max_retries: Maximum number of retry attempts (default: 3)
             
         Returns:
             The assistant's response content
             
         Raises:
-            LLMAPIError: If the API returns an error
+            LLMAPIError: If the API returns an error after all retries
         """
+        import asyncio
+        
         client = await self._get_client()
         
         is_reasoner = "reasoner" in self.model.lower()
@@ -202,40 +224,56 @@ class LLMClient:
             if use_json_format:
                 payload["response_format"] = {"type": "json_object"}
         
-        try:
-            logger.info(f"Sending request to LLM API: {self.api_url}/chat/completions (model: {self.model})")
-            logger.debug(f"Payload model: {payload.get('model')}, messages count: {len(messages)}")
-            
-            response = await client.post(
-                f"{self.api_url}/chat/completions",
-                json=payload,
-            )
-            
-            logger.info(f"LLM API response status: {response.status_code}")
-            response.raise_for_status()
-            
-            data = response.json()
-            message = data["choices"][0]["message"]
-            
-            # For deepseek-reasoner model, reasoning_content contains the thinking process
-            content = message.get("content", "")
-            
-            # Log reasoning if present (for debugging)
-            if message.get("reasoning_content"):
-                logger.info(f"Model reasoning length: {len(message['reasoning_content'])} chars")
-                logger.debug(f"Model reasoning: {message['reasoning_content'][:500]}...")
-            
-            return content
-            
-        except httpx.HTTPStatusError as e:
-            logger.error(f"LLM API HTTP error: {e.response.status_code} - {e.response.text}")
-            raise LLMAPIError(f"API returned status {e.response.status_code}: {e.response.text}")
-        except httpx.RequestError as e:
-            logger.error(f"LLM API request error: {e}")
-            raise LLMAPIError(f"Request failed: {e}")
-        except (KeyError, IndexError) as e:
-            logger.error(f"Unexpected API response format: {e}")
-            raise LLMAPIError(f"Unexpected response format: {e}")
+        last_error = None
+        
+        for attempt in range(max_retries):
+            try:
+                if attempt > 0:
+                    # Exponential backoff: 2s, 4s, 8s...
+                    wait_time = 2 ** attempt
+                    logger.info(f"Retry attempt {attempt + 1}/{max_retries} after {wait_time}s delay...")
+                    await asyncio.sleep(wait_time)
+                
+                logger.info(f"Sending request to LLM API: {self.api_url}/chat/completions (model: {self.model})")
+                logger.debug(f"Payload model: {payload.get('model')}, messages count: {len(messages)}")
+                
+                response = await client.post(
+                    f"{self.api_url}/chat/completions",
+                    json=payload,
+                )
+                
+                logger.info(f"LLM API response status: {response.status_code}")
+                response.raise_for_status()
+                
+                data = response.json()
+                message = data["choices"][0]["message"]
+                
+                # For deepseek-reasoner model, reasoning_content contains the thinking process
+                content = message.get("content", "")
+                
+                # Log reasoning if present (for debugging)
+                if message.get("reasoning_content"):
+                    logger.info(f"Model reasoning length: {len(message['reasoning_content'])} chars")
+                    logger.debug(f"Model reasoning: {message['reasoning_content'][:500]}...")
+                
+                return content
+                
+            except httpx.HTTPStatusError as e:
+                last_error = e
+                logger.warning(f"LLM API HTTP error (attempt {attempt + 1}): {e.response.status_code} - {e.response.text[:200]}")
+                # Don't retry on 4xx errors (client errors) except 429 (rate limit)
+                if 400 <= e.response.status_code < 500 and e.response.status_code != 429:
+                    raise LLMAPIError(f"API returned status {e.response.status_code}: {e.response.text}")
+            except httpx.RequestError as e:
+                last_error = e
+                logger.warning(f"LLM API request error (attempt {attempt + 1}): {e}")
+            except (KeyError, IndexError) as e:
+                last_error = e
+                logger.warning(f"Unexpected API response format (attempt {attempt + 1}): {e}")
+        
+        # All retries exhausted
+        logger.error(f"LLM API failed after {max_retries} attempts. Last error: {last_error}")
+        raise LLMAPIError(f"API failed after {max_retries} retries: {last_error}")
     
     def _build_split_prompt(self, comments: list[str]) -> list[dict]:
         """Build prompt for splitting comments into defects."""
@@ -594,6 +632,7 @@ CONTENT:
         Split comments into individual defects using LLM.
         
         Processes comments in batches according to SPLIT_BATCH_SIZE setting.
+        Includes retry logic for JSON parsing errors.
         
         Args:
             comments: List of comment strings to split
@@ -603,7 +642,7 @@ CONTENT:
             
         Raises:
             LLMAPIError: If API call fails
-            LLMResponseParseError: If response cannot be parsed
+            LLMResponseParseError: If response cannot be parsed after retries
         """
         if not comments:
             return []
@@ -618,13 +657,27 @@ CONTENT:
             logger.info(f"Processing split batch {batch_num}/{total_batches}, size: {len(batch)}")
             
             messages = self._build_split_prompt(batch)
-            logger.info(f"Calling LLM API for batch {batch_num}...")
-            response = await self._call_api(messages)
-            logger.info(f"Batch {batch_num} response received, parsing...")
-            logger.info(f"Raw LLM response (first 2000 chars): {response[:2000]}")
-            batch_results = self._parse_split_response(response, len(batch))
-            all_results.extend(batch_results)
-            logger.info(f"Batch {batch_num} complete")
+            
+            # Retry loop for parsing errors
+            max_parse_retries = 2
+            for parse_attempt in range(max_parse_retries):
+                try:
+                    logger.info(f"Calling LLM API for batch {batch_num}...")
+                    response = await self._call_api(messages)
+                    logger.info(f"Batch {batch_num} response received, parsing...")
+                    logger.info(f"Raw LLM response (first 2000 chars): {response[:2000]}")
+                    batch_results = self._parse_split_response(response, len(batch))
+                    all_results.extend(batch_results)
+                    logger.info(f"Batch {batch_num} complete")
+                    break  # Success, exit retry loop
+                except LLMResponseParseError as e:
+                    if parse_attempt < max_parse_retries - 1:
+                        logger.warning(f"JSON parse error on batch {batch_num}, retrying... ({parse_attempt + 1}/{max_parse_retries})")
+                        import asyncio
+                        await asyncio.sleep(2)  # Brief delay before retry
+                    else:
+                        logger.error(f"JSON parse error on batch {batch_num} after {max_parse_retries} attempts")
+                        raise
         
         return all_results
 
