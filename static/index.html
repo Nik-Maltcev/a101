@@ -544,11 +544,38 @@
             if (pollInterval) { clearInterval(pollInterval); pollInterval = null; }
         }
 
+        let pollErrorCount = 0;
+        const MAX_POLL_ERRORS = 5;
+
         async function checkJobStatus() {
             if (!currentJobId) return;
             try {
                 const response = await fetch(`/jobs/${currentJobId}`);
-                if (!response.ok) throw new Error('Ошибка получения статуса');
+                
+                if (response.status === 404) {
+                    // Job not found - server might have restarted
+                    pollErrorCount++;
+                    if (pollErrorCount >= MAX_POLL_ERRORS) {
+                        stopPolling();
+                        showError('Задача не найдена. Сервер мог перезапуститься. Попробуйте загрузить файл заново.');
+                        hideProgress();
+                    }
+                    return;
+                }
+                
+                if (!response.ok) {
+                    pollErrorCount++;
+                    if (pollErrorCount >= MAX_POLL_ERRORS) {
+                        stopPolling();
+                        showError('Ошибка получения статуса. Попробуйте обновить страницу.');
+                        hideProgress();
+                    }
+                    return;
+                }
+                
+                // Success - reset error count
+                pollErrorCount = 0;
+                
                 const data = await response.json();
                 updateProgress(data);
 
@@ -561,9 +588,16 @@
                     hideProgress();
                 }
             } catch (error) {
-                stopPolling();
-                showError(error.message);
-                hideProgress();
+                // Network error - might be temporary
+                pollErrorCount++;
+                console.error('Poll error:', error);
+                
+                if (pollErrorCount >= MAX_POLL_ERRORS) {
+                    stopPolling();
+                    showError('Потеряно соединение с сервером. Проверьте интернет и попробуйте снова.');
+                    hideProgress();
+                }
+                // Otherwise continue polling - might recover
             }
         }
 
@@ -716,6 +750,7 @@
             selectedFile = null;
             currentJobId = null;
             analyticsData = null;
+            pollErrorCount = 0;
             fileInput.value = '';
             fileInfo.classList.remove('visible');
             uploadBtn.disabled = true;
