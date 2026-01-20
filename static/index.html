@@ -629,7 +629,17 @@
                         <div class="export-result-text" id="exportResultText"></div>
                         <div class="btn-group">
                             <button class="btn btn-success" id="downloadExportBtn">📥 Скачать Excel</button>
-                            <button class="btn btn-secondary" id="processExportBtn">🔄 Обработать классификатором</button>
+                            <button class="btn btn-primary" id="splitDefectsBtn">✂️ Разделить дефекты</button>
+                            <button class="btn btn-secondary" id="processExportBtn">🔄 В классификатор</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Processed result -->
+                    <div class="export-result" id="processedResult">
+                        <div class="export-result-text" id="processedResultText"></div>
+                        <div class="btn-group">
+                            <button class="btn btn-success" id="downloadProcessedBtn">📥 Скачать обработанный</button>
+                            <button class="btn btn-secondary" id="classifyProcessedBtn">🔄 В классификатор</button>
                         </div>
                     </div>
                     
@@ -1086,6 +1096,10 @@
                     exportStatus.className = 'domyland-status success';
                     exportStatus.textContent = '✅ ' + data.message;
                     lastExportUrl = data.download_url;
+                    // Extract file_id from URL: /domyland/download/{file_id}?type=...
+                    const urlMatch = data.download_url.match(/\/download\/([^?]+)/);
+                    lastExportFileId = urlMatch ? urlMatch[1] : null;
+                    lastExportType = document.getElementById('exportType').value;
                     document.getElementById('exportResultText').textContent = 
                         `Экспортировано ${data.record_count} записей`;
                     exportResult.classList.add('visible');
@@ -1109,6 +1123,69 @@
 
         document.getElementById('downloadExportBtn').addEventListener('click', () => {
             if (lastExportUrl) window.location.href = lastExportUrl;
+        });
+
+        // Split defects using "|" delimiter (Domyland processor)
+        let lastExportFileId = null;
+        let lastExportType = null;
+        let lastProcessedUrl = null;
+        
+        document.getElementById('splitDefectsBtn').addEventListener('click', async () => {
+            if (!domylandSessionId || !lastExportFileId) return;
+            
+            exportStatus.className = 'domyland-status info';
+            exportStatus.textContent = '⏳ Разделение дефектов по разделителю "|"...';
+            document.getElementById('processedResult').classList.remove('visible');
+            
+            try {
+                const response = await fetch('/domyland/process', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        session_id: domylandSessionId,
+                        file_id: lastExportFileId,
+                        export_type: lastExportType,
+                    })
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    exportStatus.className = 'domyland-status success';
+                    exportStatus.textContent = '✅ ' + data.message;
+                    lastProcessedUrl = data.download_url;
+                    document.getElementById('processedResultText').textContent = 
+                        `Разделено: ${data.original_count} → ${data.expanded_count} строк`;
+                    document.getElementById('processedResult').classList.add('visible');
+                } else {
+                    exportStatus.className = 'domyland-status error';
+                    exportStatus.textContent = '❌ ' + data.message;
+                }
+            } catch (error) {
+                exportStatus.className = 'domyland-status error';
+                exportStatus.textContent = '❌ Ошибка: ' + error.message;
+            }
+        });
+        
+        document.getElementById('downloadProcessedBtn').addEventListener('click', () => {
+            if (lastProcessedUrl) window.location.href = lastProcessedUrl;
+        });
+        
+        document.getElementById('classifyProcessedBtn').addEventListener('click', async () => {
+            if (!lastProcessedUrl) return;
+            exportStatus.className = 'domyland-status info';
+            exportStatus.textContent = '⏳ Загрузка в классификатор...';
+            
+            try {
+                const response = await fetch(lastProcessedUrl);
+                const blob = await response.blob();
+                const file = new File([blob], 'domyland_processed.xlsx', { type: blob.type });
+                document.querySelector('[data-tab="classifier"]').click();
+                handleFileSelect(file);
+                uploadBtn.click();
+            } catch (error) {
+                exportStatus.className = 'domyland-status error';
+                exportStatus.textContent = '❌ Ошибка: ' + error.message;
+            }
         });
 
         document.getElementById('processExportBtn').addEventListener('click', async () => {
@@ -1137,9 +1214,13 @@
         document.getElementById('domylandLogout').addEventListener('click', () => {
             domylandSessionId = null;
             lastExportUrl = null;
+            lastExportFileId = null;
+            lastExportType = null;
+            lastProcessedUrl = null;
             domylandAuthForm.style.display = 'block';
             domylandExportForm.style.display = 'none';
             exportResult.classList.remove('visible');
+            document.getElementById('processedResult').classList.remove('visible');
             exportStatus.className = 'domyland-status';
             document.getElementById('domylandPassword').value = '';
         });

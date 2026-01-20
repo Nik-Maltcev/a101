@@ -104,11 +104,7 @@ class DomylandExportService:
     ) -> Path:
         """Export orders to Excel.
         
-        Exports only required fields: id, address, title, valueString, valueText, extId, createdAt
-        
-        From orderElements:
-        - valueString = valueTitle (the actual value/answer, e.g. "Стена", "Окна/витражи")
-        - valueText = elementTitle (the question/field name)
+        Exports fields: id, address, title, valueString, valueText, extId, createdAt
         """
         raw_data = await self.client.get_orders_with_invoices(
             building_id=building_id,
@@ -118,30 +114,29 @@ class DomylandExportService:
         # Transform data to extract only needed fields
         data = []
         for order in raw_data:
-            # Extract valueString and valueText from orderElements
-            # valueString = actual values (defects, locations, etc.)
-            # valueText = field names/questions
-            value_strings = []
-            value_texts = []
-            
             order_elements = order.get("orderElements", [])
+            
+            # Collect all values and element titles
+            value_strings = []  # valueTitle - actual values
+            value_texts = []    # elementTitle - field names
+            
             for elem in order_elements:
-                val = elem.get("valueTitle")
-                if val:  # Only non-null values
-                    value_strings.append(str(val))
-                
+                val_title = elem.get("valueTitle")
                 elem_title = elem.get("elementTitle")
+                
+                if val_title:
+                    value_strings.append(str(val_title))
                 if elem_title:
                     value_texts.append(str(elem_title))
             
-            # Remove duplicates while preserving order
+            # Remove duplicates
             value_strings = list(dict.fromkeys(value_strings))
             value_texts = list(dict.fromkeys(value_texts))
             
-            # Build address from available fields
+            # Build address
             address = order.get("placeAddress") or order.get("buildingTitle") or ""
             
-            # Convert timestamp to readable date
+            # Convert timestamp
             created_at_ts = order.get("createdAt")
             created_at_str = ""
             if created_at_ts and isinstance(created_at_ts, int):
@@ -153,7 +148,7 @@ class DomylandExportService:
             row = {
                 "id": order.get("id"),
                 "address": address,
-                "title": order.get("serviceTitle") or order.get("orderTypeTitle") or "",
+                "title": order.get("serviceTitle") or "",
                 "valueString": " | ".join(value_strings) if value_strings else "",
                 "valueText": " | ".join(value_texts) if value_texts else "",
                 "extId": order.get("extId"),

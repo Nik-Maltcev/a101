@@ -12,6 +12,7 @@ from pydantic import BaseModel
 from app.config import settings
 from app.services.domyland_client import DomylandClient, DomylandAuthError, DomylandClientError
 from app.services.domyland_export import DomylandExportService
+from app.services.domyland_processor import process_domyland_data
 
 router = APIRouter(prefix="/domyland", tags=["domyland"])
 
@@ -238,3 +239,126 @@ async def get_export_types():
             {"id": "payments", "name": "Платежи", "description": "История платежей"},
         ]
     }
+
+
+
+class ProcessRequest(BaseModel):
+    """Request to process Domyland export file."""
+    session_id: str
+    file_id: str
+    export_type: str = "orders"
+
+
+class ProcessResponse(BaseModel):
+    """Response from processing."""
+    success: bool
+    message: str
+    download_url: Optional[str] = None
+    original_count: Optional[int] = None
+    expanded_count: Optional[int] = None
+
+
+@router.post("/process", response_model=ProcessResponse)
+async def process_domyland_file(request: ProcessRequest) -> ProcessResponse:
+    """
+    Process exported Domyland file - split defects by "|" delimiter.
+    
+    This is a separate processor that:
+    1. Uses "|" as delimiter (not LLM)
+    2. Filters out location-only values (Окно, Стена, etc.)
+    3. Expands rows - one row per defect
+    """
+    # Check session
+    session = _tokens.get(request.session_id)
+    if not session:
+        return ProcessResponse(
+            success=False,
+            message="Сессия не найдена. Авторизуйтесь заново.",
+        )
+    
+    # Find source file
+    source_path = settings.RESULTS_DIR / f"domyland_{request.export_type}_{request.file_id}.xlsx"
+    if not source_path.exists():
+        return ProcessResponse(
+            success=False,
+            message="Исходный файл не найден. Сначала выполните экспорт.",
+        )
+    
+    try:
+        from openpyxl import load_workbook, Workbook
+        
+        # Read source file
+        wb = load_workbook(source_path, read_only=True)
+        ws = wb.active
+        
+        # Get headers and data
+        rows = list(ws.iter_rows(values_only=True))
+        if not rows:
+            return ProcessResponse(success=False, message="Файл пустой")
+        
+        headers = list(rows[0])
+        data = []
+        for row in rows[1:]:
+            data.append(dict(zip(headers, row)))
+        
+        wb.close()
+        
+        original_count = len(data)
+        
+        # Process data - split defects
+        processed_data = process_domyland_data(data)
+        expanded_count = len(processed_data)
+        
+        # Write processed file
+        processed_file_id = str(uuid.uuid4())
+        output_path = settings.RESULTS_DIR / f"domyland_processed_{processed_file_id}.xlsx"
+        
+        # Add "Дефект" column to headers if not present
+        output_headers = headers.copy()
+        if "Дефект" not in output_headers:
+            output_headers.append("Дефект")
+        
+        wb_out = Workbook()
+        ws_out = wb_out.active
+        ws_out.title = "Processed"
+        
+        # Write headers
+        for col, header in enumerate(output_headers, 1):
+            ws_out.cell(row=1, column=col, value=header)
+        
+        # Write data
+        for row_idx, record in enumerate(processed_data, 2):
+            for col_idx, header in enumerate(output_headers, 1):
+                value = record.get(header, "")
+                ws_out.cell(row=row_idx, column=col_idx, value=value)
+        
+        wb_out.save(output_path)
+        
+        return ProcessResponse(
+            success=True,
+            message=f"Обработано: {original_count} → {expanded_count} строк",
+            download_url=f"/domyland/download-processed/{processed_file_id}",
+            original_count=original_count,
+            expanded_count=expanded_count,
+        )
+        
+    except Exception as e:
+        return ProcessResponse(
+            success=False,
+            message=f"Ошибка обработки: {e}",
+        )
+
+
+@router.get("/download-processed/{file_id}")
+async def download_processed(file_id: str) -> FileResponse:
+    """Download processed Domyland file."""
+    output_path = settings.RESULTS_DIR / f"domyland_processed_{file_id}.xlsx"
+    
+    if not output_path.exists():
+        raise HTTPException(status_code=404, detail="Файл не найден")
+    
+    return FileResponse(
+        path=str(output_path),
+        filename=f"domyland_processed_{datetime.now().strftime('%Y%m%d_%H%M')}.xlsx",
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
