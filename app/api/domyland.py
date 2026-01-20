@@ -32,6 +32,7 @@ class AuthResponse(BaseModel):
     success: bool
     message: str
     session_id: Optional[str] = None
+    available_exports: Optional[list[dict]] = None  # List of available export types
 
 
 class ExportRequest(BaseModel):
@@ -58,6 +59,7 @@ async def authenticate(request: AuthRequest) -> AuthResponse:
     Authenticate with Domyland API.
     
     Returns a session_id to use for subsequent requests.
+    Also checks which export types are available for this user.
     """
     client = DomylandClient()
     
@@ -68,18 +70,23 @@ async def authenticate(request: AuthRequest) -> AuthResponse:
             tenant_name=request.tenant_name,
         )
         
+        # Check available permissions
+        available_exports = await _check_permissions(client)
+        
         # Generate session ID and store token
         session_id = str(uuid.uuid4())
         _tokens[session_id] = {
             "token": token,
             "tenant_name": request.tenant_name,
             "created_at": datetime.utcnow().isoformat(),
+            "available_exports": [e["id"] for e in available_exports],
         }
         
         return AuthResponse(
             success=True,
-            message="Авторизация успешна",
+            message=f"Авторизация успешна. Доступно {len(available_exports)} типов экспорта.",
             session_id=session_id,
+            available_exports=available_exports,
         )
         
     except DomylandAuthError as e:
@@ -89,6 +96,32 @@ async def authenticate(request: AuthRequest) -> AuthResponse:
         )
     finally:
         await client.close()
+
+
+async def _check_permissions(client: DomylandClient) -> list[dict]:
+    """Check which API endpoints are accessible for the authenticated user."""
+    all_types = [
+        {"id": "buildings", "name": "Объекты/здания", "endpoint": "buildings"},
+        {"id": "places", "name": "Помещения", "endpoint": "places"},
+        {"id": "orders", "name": "Заявки со счетами", "endpoint": "orders/invoices"},
+        {"id": "customers", "name": "Клиенты", "endpoint": "customers"},
+        {"id": "payments", "name": "Платежи", "endpoint": "payments"},
+    ]
+    
+    available = []
+    for export_type in all_types:
+        try:
+            # Try to fetch first page to check access
+            await client._request("GET", export_type["endpoint"], params={"fromRow": 0})
+            available.append({
+                "id": export_type["id"],
+                "name": export_type["name"],
+            })
+        except DomylandClientError:
+            # No access to this endpoint
+            pass
+    
+    return available
 
 
 @router.post("/export", response_model=ExportResponse)

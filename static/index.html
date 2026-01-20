@@ -992,7 +992,7 @@
 
             domylandAuthBtn.disabled = true;
             authStatus.className = 'domyland-status info';
-            authStatus.textContent = '⏳ Авторизация...';
+            authStatus.textContent = '⏳ Авторизация и проверка доступов...';
 
             try {
                 const response = await fetch('/domyland/auth', {
@@ -1004,6 +1004,31 @@
 
                 if (data.success) {
                     domylandSessionId = data.session_id;
+                    
+                    // Update export type dropdown with available options
+                    const exportTypeSelect = document.getElementById('exportType');
+                    exportTypeSelect.innerHTML = '';
+                    
+                    if (data.available_exports && data.available_exports.length > 0) {
+                        data.available_exports.forEach(exp => {
+                            const option = document.createElement('option');
+                            option.value = exp.id;
+                            option.textContent = exp.name;
+                            exportTypeSelect.appendChild(option);
+                        });
+                        
+                        // Update auth success message
+                        document.getElementById('authSuccess').textContent = 
+                            `✅ ${data.message}`;
+                        
+                        // Trigger change to update form fields
+                        exportTypeSelect.dispatchEvent(new Event('change'));
+                    } else {
+                        authStatus.className = 'domyland-status error';
+                        authStatus.textContent = '❌ Нет доступных типов экспорта для вашего аккаунта';
+                        return;
+                    }
+                    
                     domylandAuthForm.style.display = 'none';
                     domylandExportForm.style.display = 'block';
                 } else {
