@@ -102,12 +102,80 @@ class DomylandExportService:
         building_id: Optional[int] = None,
         created_at: Optional[str] = None,
     ) -> Path:
-        """Export orders with invoices to Excel."""
-        data = await self.client.get_orders_with_invoices(
+        """Export orders with invoices to Excel.
+        
+        Exports only required fields: id, address, title, valueString, valueText, extId, createdAt
+        """
+        raw_data = await self.client.get_orders_with_invoices(
             building_id=building_id,
             created_at=created_at,
         )
-        return self._write_to_excel(data, output_path, "Orders")
+        
+        # Transform data to extract only needed fields
+        data = []
+        for order in raw_data:
+            # Extract valueString and valueText from orderElements
+            value_strings = []
+            value_texts = []
+            
+            order_elements = order.get("orderElements", [])
+            for elem in order_elements:
+                if elem.get("valueTitle"):
+                    value_strings.append(elem["valueTitle"])
+                if elem.get("elementTitle"):
+                    value_texts.append(elem["elementTitle"])
+            
+            # Build address from available fields
+            address = order.get("placeAddress") or order.get("buildingTitle") or ""
+            
+            # Convert timestamp to readable date
+            created_at_ts = order.get("createdAt")
+            created_at_str = ""
+            if created_at_ts and isinstance(created_at_ts, int):
+                try:
+                    created_at_str = datetime.fromtimestamp(created_at_ts).strftime("%d.%m.%Y %H:%M")
+                except:
+                    created_at_str = str(created_at_ts)
+            
+            row = {
+                "id": order.get("id"),
+                "address": address,
+                "title": order.get("serviceTitle") or order.get("orderTypeTitle") or "",
+                "valueString": " | ".join(value_strings) if value_strings else "",
+                "valueText": " | ".join(value_texts) if value_texts else "",
+                "extId": order.get("extId"),
+                "createdAt": created_at_str,
+            }
+            data.append(row)
+        
+        return self._write_to_excel_ordered(data, output_path, "Orders", 
+            ["id", "address", "title", "valueString", "valueText", "extId", "createdAt"])
+    
+    def _write_to_excel_ordered(
+        self, 
+        data: list[dict], 
+        output_path: Path, 
+        sheet_name: str,
+        headers: list[str]
+    ) -> Path:
+        """Write list of dicts to Excel file with specific column order."""
+        wb = Workbook()
+        ws = wb.active
+        ws.title = sheet_name
+        
+        # Write headers
+        for col, header in enumerate(headers, 1):
+            ws.cell(row=1, column=col, value=header)
+        
+        # Write data
+        for row_idx, record in enumerate(data, 2):
+            for col_idx, header in enumerate(headers, 1):
+                value = record.get(header, "")
+                ws.cell(row=row_idx, column=col_idx, value=value)
+        
+        wb.save(output_path)
+        logger.info(f"Exported {len(data)} records to {output_path}")
+        return output_path
     
     async def export_payments(
         self,
