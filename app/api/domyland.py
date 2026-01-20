@@ -103,7 +103,7 @@ async def _check_permissions(client: DomylandClient) -> list[dict]:
     all_types = [
         {"id": "buildings", "name": "Объекты/здания", "endpoint": "buildings"},
         {"id": "places", "name": "Помещения", "endpoint": "places"},
-        {"id": "orders", "name": "Заявки со счетами", "endpoint": "orders/invoices"},
+        {"id": "orders", "name": "Заявки", "endpoint": "orders"},
         {"id": "customers", "name": "Клиенты", "endpoint": "customers"},
         {"id": "payments", "name": "Платежи", "endpoint": "payments"},
     ]

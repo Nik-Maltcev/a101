@@ -102,9 +102,13 @@ class DomylandExportService:
         building_id: Optional[int] = None,
         created_at: Optional[str] = None,
     ) -> Path:
-        """Export orders with invoices to Excel.
+        """Export orders to Excel.
         
         Exports only required fields: id, address, title, valueString, valueText, extId, createdAt
+        
+        From orderElements:
+        - valueString = valueTitle (the actual value/answer, e.g. "Стена", "Окна/витражи")
+        - valueText = elementTitle (the question/field name)
         """
         raw_data = await self.client.get_orders_with_invoices(
             building_id=building_id,
@@ -115,15 +119,24 @@ class DomylandExportService:
         data = []
         for order in raw_data:
             # Extract valueString and valueText from orderElements
+            # valueString = actual values (defects, locations, etc.)
+            # valueText = field names/questions
             value_strings = []
             value_texts = []
             
             order_elements = order.get("orderElements", [])
             for elem in order_elements:
-                if elem.get("valueTitle"):
-                    value_strings.append(elem["valueTitle"])
-                if elem.get("elementTitle"):
-                    value_texts.append(elem["elementTitle"])
+                val = elem.get("valueTitle")
+                if val:  # Only non-null values
+                    value_strings.append(str(val))
+                
+                elem_title = elem.get("elementTitle")
+                if elem_title:
+                    value_texts.append(str(elem_title))
+            
+            # Remove duplicates while preserving order
+            value_strings = list(dict.fromkeys(value_strings))
+            value_texts = list(dict.fromkeys(value_texts))
             
             # Build address from available fields
             address = order.get("placeAddress") or order.get("buildingTitle") or ""

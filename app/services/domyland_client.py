@@ -209,7 +209,7 @@ class DomylandClient:
         service_id: Optional[int] = None,
     ) -> list[dict]:
         """
-        Get orders with invoices.
+        Get orders (regular orders endpoint, not invoices).
         
         Args:
             building_id: Filter by building
@@ -233,7 +233,8 @@ class DomylandClient:
         if service_id:
             params["serviceId"] = service_id
         
-        return await self.get_all_pages("orders/invoices", params)
+        # Use /orders endpoint (not /orders/invoices which may be empty)
+        return await self.get_all_pages("orders", params)
     
     async def get_payments(
         self,
