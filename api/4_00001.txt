@@ -1,0 +1,181 @@
+MntTerpayma c Jlomuneny
+
+MuTerpauma c Jlomuneny, “ Copepxanne
+06 SkKcnopT NOMeLLECHMN coos
+ume CBeneHnA 0c06 BbIs0Ba
+Tepmvubi m onpegenenna Napamerppi sanpoca
+THMb! AaHHbIX Nonyyeuve cnucka NomMeueHnin. Teno 3anpoca
+API CRM v Teno oTBeTa
+O6wMe cBeqeHMA Teno oTBeTa (NPM OWM6Ke)
+
+Cnoco6 BbIsOBa
+
+Mmnopr > NpuMep Bbis0Ba
+‘SkenopT v GET ~/places Npumep orsera
+O6beKTbI
+KnMeHTbl
+Nomemenna NMapamertpbI 3anpoca
+Nokaszanua MY
+Nokaszanua ONY ATpH6yT Tun OnncaHne O6a3aTenbHOCTb
+naareKn ABHHBIX
+SaABKM CO CueTaMH
+updatedAt string unetpauna no gare obHoBneHHA 8 bopmaTe HeoGAzaTenbHbii
+Vimmopr (cTpowTenbcTBo) => AQ.MM.CTTT 44:MM-CC-0.0.MM.ITTT 44:MM:CC nnn
+‘KcNopT (cTpovTenbcTBO) => 20.MM.CTTT-20.MM.crrr
+Beé-xykn >
+Npouwe BO3MOXKHOCTH >
+YcTapeBuime MeTOsb! >
+XML uuterpauna CRM > Teno sanpoca
+API MarketPlace
+OTcyTcTByHOT
+Muterpauna c AC >
+Aesenonepa
+Mvuu-npwnoenua > Teno otBeta
+YmHoe 3gaHue >
+Atpw6yT Tan Onucanne O6a3aTenbHocTD
+AaHHEIX
+nextRow int Homep cTpoxis, c oGnsatenbHbit
+KOTOpor MoxHO
+npopomkurs
+nonyyenne cnucKa.
+SHayeHwe
+‘TpeGyercr nepegare
+8 GET napametpe
+fromRow
+cnegyrowero
+aganpoca, 4To6
+nonywnte
+ouepenHyio nopunio
+AakHbix. Eon
+nextRow == -1,
+aHaUnT B
+
+nocnegvem sanpoce
+6binn nonyueHbI ace
+ocTaBuimeca
+
+eTpoKn.
+
+items aray Maccne o6bextos, oBagaTenbHeti
+onncbisarouyax
+Aarne
+ToMeUleHHA
+
+items[n].id int Wgextudukatop oGAgaTenbHbIit
+nomewjeHna 8 CRM.
+
+items|n].extid string VaneutuduKatop
+TNOMeWICHMA BO
+BHeWHel cHcTeMe
+
+items[n].buildingld int Vgextuduxatop obagatenbHbilt
+o6beKxTa B CRM
+items[n].title string HaseaHne
+NOMeWeHHA
+items[n].number string Homep nomeujeHnA
+items[n].floor string ‘Tak NOMELIEHHA
+items[n].entranceNumber string Homep nogpesya
+items[n].houseNumber string Homep oma
+items[n].street string Yana nomeuexina
+items|n].address string Agpec nomewexna
+items[n].areaSize float >Kunaa nnowanp
+
+nomeweHia
+Mems|n).totaiareasize noat UoujaA nHowanb
+
+TomeujeHinn
+
+items[n]. accounts Object!) Macens o6textos,
+onnepipaiouix FIC
+noMeuleHAA
+
+items[n].accounts|i].id int gextuguxarop NC
+
+nomeujeHHa B GRM.
+
+items[n].accounts[i]. number string Homep nuyeporo
+cueTa
+items|n].accountsli].numberGIS string ENC nomewenua,
+
+eon bin ykagaH
+
+items[n].placeToCustomer Object{] Maccue o6textos,
+onnepiBaiouuit
+knmeHToB,
+godaenenHbrx B
+nomeujenne
+
+items[n].placeToCustomer[i].customerid int WgextuduKatop
+KnWeHTAa B CRM
+
+items[n].placeToCustomer(i].customerFullName string @MO knnenta
+
+items[n].placeToCustomer|i].customerTypeld int VgentuduKatop
+tuna KnKeHTa:
+1.dvanueckoe nnyo
+2.Muaneuayanbubiit
+npegnpunnmarenb
+3.}0pHamueckoe
+niyo
+4.0unman unu np-80
+
+wHOCTpakHoro
+roprguueckoro,
+
+nna
+
+Teno oTgeta (npu oluM6Ke)
+
+Arpn6yT Tun patpix = Onucanne OGnsarenbHocTD
+
+userMessages array Maceue cTpok ii 06 ii
+
+Mpumep BbI3s0Ba
+GET ~/places
+
+AppName: app-test
+
+Authorization: dnvf89kk01rbuumd2rkdufj8p7
+
+lpumep oTBeta
+
+208 OK
+{
+“items": [
+{
+
+“id": 2317990,
+
+“extId": null,
+“buildingld": 5815,
+“title": "“g. 25 Ke 1a",
+
+“entranceNumbe null,
+
+“street”: "KK Bonokonamck",
+
+“address” ‘MK Bonokonamck, g. 25 kB la",
+“8.86",
+
+“houseNumber": "25",
+“placeTypeShortTitle": “ka”,
+
+“placeTypeImage”: “https://static.domyland.ru/img/icons/place-type/icon1 .
+
+“accounts”: [
+
+“id": 2534472,
+“number”: "2277983",
+“numberGIS": null
+
+},
+“numberOrder": 160080,
+“placeToCustomer": [
+
+“customerId": 1428695,
+“customerTypeId": 1,
+“customerFullName": "MpaHos MaaH MaaHoanu"
+y
+1,
+“tags": []
+

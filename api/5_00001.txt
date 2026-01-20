@@ -1,0 +1,253 @@
+MntTerpayma c Jlomuneny
+
+MuTerpauma c Jlomuneny,
+O6une cBegennA
+
+Tepmvubi m onpegenenna
+
+THN! Qa@HHbIX
+
+API CRM v
+
+OGuwMe cBeAeHHA
+
+Cnoco6 BbIsOBa
+
+OkKcnopT NoKasaHui UY
+
+NonyyeHue cnucka NepefaHHbix noKasaHue NY.
+
+Copepxanne
+
+Cnoco6 BbizoBa
+Napamerppi sanpoca
+Teno sanpoca
+
+Teno oTBeTa
+
+Teno oTBeTa (NPM OWM6Ke)
+
+Mmnopr > NpuMep Bbis0Ba
+2kenopt v Npumep orsera
+O6beKTbI
+KnMeHTbl
+NomeujeHna NMapamertpb 3anpoca
+
+NoxaszaHua MNY
+Nokaszanua ONY ATpH6yT Tan Onucanve O6a3aTenbHOCTb
+Mnatexn AAHHEDX
+
+SaABKM CO CHeTaMA
+
+fromRow int C Kakoii cTpokh npomomxnTb BbIBOA AaHHENX, NPA oGazaTenbHeiii
+Munopr (cTpowrenkerBo) > repo sbigose nepegagar> 0
+3kenopT (CTpovTenbcTBO) =>
+Beé-xykun > isLast int Ecnw 1 - 6ygyT sosapauyenb! TonbKo NocnepHne oSAgaTenbHbI
+Npoune BosMoxHocrs " akTyanbHble nokagaHiia, ecnn 0 - 6yayT
+BOSBpaLeHbI Bce KOrMa-NKGo COXpaHeHHbIe
+YcTapeBuime MeTOsb! > nokasanee
+XML unterpauna CRM >
+API MarketPlace > haséventid int Ecru 1, 70 GyayT BO3BPALLSHbI TONbKO NOKasaHHA,
+MomaHHble vepes JIK KnMeHTa
+Muterpauna c AC > a P
+Aesenonepa
+companyild int Ecru nepegauo, To 6ypyT BO3BPalljeHbI TONbKO.
+Mvnuw-npunoxkenva > any! PEABHO, yayT Pau
+NlokazaHnA AA ykazaHHoro HopmgnuecKoro nhya
+YmHoe 3gaHue >
+companyExtld string BHeEWHHit MfeHTH@uKaTOp HOpHAMYeCKaro Nua.
+Heo6xogumo npegpapiTensHo amaTs sHaueHe B
+none «BHewHuia MaeHTHbHKaTOp» B KApTOUKe Lop.
+nua.
+buildingid int Vgentabukarop o6bexra.
+buildingExtld ‘string BHewHnit mgeHTHguKatop o6pexTa.
+placeld int WgentHukatop nomeweHHA
+placeextid string BHEWHHit MgeHTHOUKATOp NOMEWeHHA
+meteringTypeld int ipentupukarop Tuna cueTunKa,
+meteringGroupid int Wgexr Tana i
+submittedat string ata ornpasku noKasannii. lManason
+
+@opmar: DD.MM.YYYY-DD.MM.YYYY,
+Mpumep: 01.01.2020-07.01.2020
+
+Teno 3anpoca
+
+OtcyTeTByeT
+
+Teno oTBeTa
+
+ATpHyT Tun Onwcanue ‘O6a3aTenbHocTb
+
+nextRow int Homep cTpoki, ¢ KOTOpOH MoDkHO
+NPogOMKMTS NonyueHMe cnucKa.
+Suauerne Tpebyerca nepepatb B
+GET napametpe fromRow
+cneayrowero sanpoca, yTO6bI
+NonyunTb ouepenHyio NOpuMIO
+AakHbm. Ecnv nextRow ==-1,
+HAUNT B NocnegHeM sanpoce
+Goinu nonyueHb! ace OcTABLIMECR
+
+CTPOKU.
+
+items array Maccne o6tekros, onucbiBalouynit
+AawHbie nokasaHiit ANY
+
+items[n]. meteringTypeld int Tun npnsopa:
+
+1. XonogHoe BogocHasKeHHe
+
+2. Topauee aogocHabkeHne
+
+3. SnekTpnyectso
+(oqHorapudHeiiy
+
+4. SnekrpHuecteo (nik - Hob)
+
+5. SnexTpnuecteo (Mk - Hub - 1/
+nuk)
+bo. UTonneHMe
+7. fas
+8, BogooTsegeHve
+
+items|n].meteringDeviceld int Vgextudbukarop npuSopa yueTa B oGnaaTenbHblii
+cRM
+items[n].meteringDeviceNumber string Homep npvGopa yuera oGagatenbHbIi
+items[n].meteringDeviceExtid string VgeHTHbukarop npuSopa yueTa Bo
+BHEWHeli CACTEME
+items[n].brandName string Mapka npuGopa yuera
+items[n].modelName string Hagsanue Mofenn npxGopa yuea
+items[n].lastCalibrationDate timestamp ata nocneaHei nporepKn
+items|n].nextc fionDate tir Ip Jara cnenyiowel nporep
+items[n].exploitationStartDate timestamp ata esoga 8 skennyaTaynto
+items[n].meteringDeviceStatusid int Mgex cTatyca o6Asa 4
+yueta:
+1 - Heticreyouuii;
+2-Ha nopepKe;
+3- Apxnanbiii;
+items|n].placeld int Mgentndukarop nomewexna B oGAgaTenbHbIit
+CRM
+items|n].placeExtid string VigentuuKarop nomewenna 80
+BHelHel CHCTeMe
+items[n].submittedat timestamp ata nogauu Texyujero moKasaHuA:
+items[n].prevSubmittedAt timestamp Qata nogaum npegpigywero
+nokasaHne, Ecnn orcyToTeyer, To
+nepegagare null
+items|n].value1 decimal Texyujee nokaganne no Tapudy 1
+(nx)
+items[n].previousValue1 decimal Mpepbinywes nokasaHne no.
+Tapucpy 1 (nuk). Eon orcyrcrayer,
+To nepenanare O
+items[n].value2 decimal Texyuiee nokazanne no tapndy 2
+(Houn) Ecnw otcyrcrayer, To
+nepegazatb 0
+items|n].previousValue2 decimal Npepbiaywee nokasaxne no
+Tapucby 2 (Houb). Fann orcytcreyer,
+To nepepapare 0
+items[n].value3 decimal Texyuiee nokagaHve mo Tapdy 3
+(n/nuk). Ecnu orcyterayer, To
+nepegaeate 0
+items|n].previousValue decimal Npeabiaywiee nokagaHne no
+TapHdy 3 (n/nuk). Eonn
+orcyTeTayer, To nepegaBath 0
+items|n].accountNumber string Homep JIC
+items[n].accountNumberGIS string TMC Homep JIC.
+Teno oTBeTa (npu OLuM6Ke)
+ATpu6yT Tun qanHeix = Onucare OGasatenbHocTh
+userMessages array Maccue cTpok ii 08 ii
+
+Mpumep BbIs0Ba
+GET ~/meteringData?isLast=1
+
+AppName: app-test
+
+Authorization: dnvf89kk01rbuumd2rkdufj8p1
+
+Npumep orBeta
+
+208 OK
+
+"items": [
+{
+
+“id”: 112297998,
+“meteringDeviceld": 2617386,
+“meteringDeviceNumber": "234234",
+“meteringDeviceExtId": “a6a9d96d-33b8-11ea-8@ec- 8658522284716",
+“brandName": “lowTopan",
+“modelName": “YunTsiBatenb-3888" ,
+‘lastCalibrationDate": null,
+“nextCalibrationDate"
+“exploitationStartDate": 1721163688,
+“valuel": "10.6080",
+
+8.9000",
+
+6.6088",
+
+"value:
+“value3":
+“previousValuei": “7.6886" ,
+“previousValue2": “@.6888" ,
+“previousValue3": “@.9800",
+“submittedAt": 1721250088,
+“prevSubmittedAt": null,
+“createdAt": 1721313472,
+
+: null,
+
+“createdByUserId”: 2,
+
+“updatedByUserId": null,
+
+“createdByCustomerId": null,
+
+“updatedByCustomerId": null,
+
+“location”: null,
+
+“accountId": “N32511898",
+
+“_accountId": 2435483,
+
+“companyld": 2
+
+“companyExtId": "123",
+
+“accountNumber": “1132511898",
+
+“accountNumberGIS": “",
+
+“placeId": 1285262,
+
+“placeExtId": "262993",
+
+“placeAddres “yn. Tectopan, o. 1a ke 1",
+
+“placeTypeId": 1,
+
+“placeTypeShortTitle": "Ka",
+
+“meteringTypeld": 3,
+
+“meteringTypeTitle": “3nextTpuyectso",
+
+‘meteringTypelmage": “https: //static.domyland.ru/img/metric/electrichestvo.p
+“measureMethod": 1,
+
+“meteringTypeShortTitle": "Sn",
+
+"meteringGroupld": 2,
+
+“buildingId": 5015,
+
+“buildingTitle": “KK BonokonamcK",
+
+“buildingExtId fofggf-qdafvgdfgfd-gdf fdsgdfd34123fd",
+
+“valueTitle1
+“valueTitle2
+“valueTitle3
+
+“delta3": "6.8008"
+

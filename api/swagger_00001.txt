@@ -1,0 +1,509 @@
+iomuneng CRM API&
+
+Auth Ayterrncncayna v
+Users corpyauunn v
+Buildings 3aatua (oovenrs) ~
+Places Momewenns v
+Customers nner: v
+Services yenym v
+Orders 3arekn no ycnyram “~
+[ES orcer-connents None ccae omerraps «saree v |
+[Fost] forder-comments /Jo6aevts kommentapuii k saneKe
+
+.
+
+eseapiten 777
+fromRow Homep CTPOKM, Ha4MHaA C KOTOPOH KOTOPOM GyseT BOSBPaljeH CNMCOK, No-ymMonyaHUto 0
+integer Example : 0
+
+(query) 0
+
+searchQuery Sanpoc ANA noucKa
+
+string
+
+(query) searchQuery
+
+placeld VUgextucbukatop nomeujeHva
+
+integer
+
+(query) placeld
+
+placeExtld BHewHMa MAeHTMpMKaTop NoMelWeHHA
+
+string
+
+(query) placeExtld
+
+buildingld Vgeutudpukatop oObektTa
+
+integer
+
+(aD buildingld
+
+buildingExtid BHEWHMA WQeHTMcpuKaTop OBbeKTa
+
+string :
+
+(query) buildingExtld
+
+buildingGrouplds =Wgextudbukatoppl rpynn ofbextos
+
+string —
+(query) buildingGrouplds
+customerld Vigeutuebikatop KnweHTa
+integer
+
+customerld
+(query)
+
+service Typeld VUneutudbukatop Tuna ycnyra
+
+integer -
+
+(query) serviceTypeld
+
+serviceld VMgextucbukatop ycnyrn
+
+integer .
+
+( serviceld
+
+(query)
+
+createdAt (lata co3qaHua, MHTepBan (B cbopmaTe A0.MM.0ITT-2.0.MM.CTTT ANIM 20.MM.0TT 44:MM:CC - 2..MMITTr 44:MM:CCc)
+oes createdAt
+
+(query)
+
+updatedAt Mata oOHopneHua”, MHTepBan (B CbopMaTe O0.MM.1TT-Q0.MM.ITTT 41M 20.MM.ITTT Y4:MM-CC - 20.MM.ITTT 44:MM:CC)
+string
+
+a updatedAt
+
+inspectorld VgexTucpukatop COTpyAHMKa, KOTOpbI BLIGPAH KOHTPONEPOM B 3aAnBKe
+integer 7
+
+(query) inspectorld
+
+responsibleUserld Mgextudbukatop CoTpyaHnka, KOTOpbIN BbIOPAH OTBETCTBEHHbIM B 3aABKe
+integer
+
+(query) responsibleUserld
+
+responsibleDeptid Vgextudnkatop nogpa3genenna, Nonb3oBaTenaAM KOTOPbIxX Ha TeKYLUMM MOMeEHT Ha3HayeHbl 3aKa3bl
+integer
+
+responsibleDeptid
+
+ce
+
+Ne
+
+were
+
+orderStatusid unbtp no ctatycy.
+
+inti
+
+ee orderStatusid
+
+(query)
+
+orderSourceld Vgextucbukatop kavana obpaujaHna
+int
+
+ee orderSourceld
+
+(query)
+
+rating uNneTp No peTHuHry.
+
+integer a
+
+(query) rating
+
+hasStatusReopen unetp no Hanuunw cTaTyca NepeorKpbito B 3aABKeE
+
+boolean v
+
+(query)
+
+reactionTimes unbtp no npocpoyexHoctu (SLA). Comma-separated none, cnucok id SLA, Hanpumep '1,3°
+string
+
+reactionTimes
+(query)
+
+solveTimeSLA Nepuog 'Boinonnuts go" 8 dopmate ‘01.01.2022 00:00-15.01.2022 23:59"
+
+string
+solveTimeSLA
+(query)
+
+hasAttachment uNeTpP NO HAaNM4MlO BNOKeHHA
+
+boolean v
+(query)
+Responses
+Code Description Links
+200 Cnmcok 3aKa30B. Ecnu nextRow < 0, 3Ha4nMT AOCTMrHYT KOHeLY CNMCKa Wo links
+Media type
+application/json
+Controls Accept header.
+Example Value | Schema
+"rating": 0,
+“ratingComent™
+image": “st
+“departmentId'
+“departmentTitle"
+roleTitl ‘i
+“considerWorkTime"
+}
+]
+“IastName
+| ewe) /orders Coaganne sanekn Vv |
+(BEES orcerssexport: Bunya sexe v |
+[ESD forders/export-invoices Burysma excel v |
+Auth aytestupnxayna wv
+Users Corpyanunu v
+Buildings 3manua (OSbextb!) v
+Places Nomewexna v
+Customers ‘wer: v
+Services venym -_
+Orders askin no ycnyram “nw
+Ww
+
+forder-comments [onyynts cnvcok KOMMGHTApHEE K 3aABKE
+
+[BEGG /orser-conments fosaars romerrapa aor v |
+SS ~ |
+[c= ] forders/export-columns-list Cnncok KonoHok ~octynHbiXx Ana ebiGopa npu aKcnopTe va |
+| /orders/export-invoice-columns-List Cnvcok KonoHok goctynHbix Ana sbiIGopa Mp SKcnopTe cueTOR v |
+[ESS /ercers/(2ay/view Omer sere powrani v |
+=a forders/{id}/unview OTMéTHTb 2aABKy He NPOUMTAHHO w
+[c= ] forders/messages CooGweHna & vatax saABoK vw |
+(ES /erderestnvotees one sanerco ora v |
+OrderTask 3anasn s sasskax no ycnyram a
+Invoices cuera v
+Metering "pusops wera v
+Checklists “exnct v
+Devices yctpoiictea v
+Parking ‘apxoexm Vv
+BuildingProjects “poexr crpoutenscrea v
+Offices couce npogax v
+Import Maccosbii4 MMNOpT QaHHbix, NogpoGHee: https://public-api.domyland.ru/sud-api/ w
+IntegrationTask Viterpaynonitie sagan vy
+Construction.Offers 1 ° CTH v
+Acceptance Mpvemka nomewennit Vv
+Selections Cnucku cywHoctei ana ucnonbsosanna B select snemenTax v
+Files 3arpyska painos v
+Webhooks se6xyxu v
+Construction.Settings Ociositie sactpoiiu (Crpowrenscteo) v
+InitialData danrvie ana nenynannsaynn crpaHuy CRM. BHYTPeHHee MeTOAbI, OOpaTHAA COBMECTMMOCTb KOTOPDIX HE NOATEpIKMBAETCA v
+TelecomCalls 3onm v
+Showcaselntegration srerpayns cart sactpoiiunca Vv
+Incidents vryngents: v
+Loyalty Kny6 npupuneraii (Skcnnyatayna) wa
+External payment Croposnne nnarexn v
+Rate Fan w
+mer
+
+BuildingExternalSupplier Ynpasnenve "BHEWHMMM NOCTaBLyMKaMM ycryr"
+
+Companies Yopasnenne pugnyeckumu KomnaHnAMn
+
+Contacts Monestvie kontaxret
+
+CustomerNotification oxrponnep ynpasnenna pacchinkamn KnneHtos
+
+ServiceOffer yapasnenne "Npeanoxenuamu"
+
+Customers.Session Ynpasnenme ceccnamu xnnexta
+
+DataUpdate\Account Mmaccossie onepaymn ¢ niueebian cyeTannt
+
+DataUpdate\Building Maccosble onepaymn c o6beKTaMn
+
+Faq Ynpasnetne teramn 8 sonpocax w orsetax
+
+GeneralMeeting.Agenda Ynpasnesne nosectxoh cc
+
+GeneralMeeting.AlertAdministrator vapasnenne onosewennem aammnnctpatopa OCC
+
+GeneralMeeting.AlertCustomers. Yopasnene onoseujermem knmenram OCC
+
+GeneralMeeting.Protocol yrpasnenne npotoronom occ
+
+GeneralMeeting.Registry Ynpasnenue peectpom coBcteexHnkos OCC
+
+GeneralMeeting.Rejection ynpasnenne otkasann coocteeHHuKos OCC
+
+GeneralMeetin ig. Result vYopasnesne ronocosanvem u ux pesynstarama
+
+GeneralMeeting.SettingsData »npaenenne Hactporixamn oowyero coopaHna
+
+GeneralMeeting Ynpasnenne oOwmmn coOpanuamn co6cTsenHukos (OCC)
+
+InitialData.Accounting ‘orponnep ana pacuera (oyx.yuera)
+
+Loyalty/Program KoxTponnep ynpasneHHa NporpaMMM NOANbHOCTH
+
+News. Alert ovmpaska yeenounexnii no Hogoctam
+
+News.Files ®asorac baiinamn xoeocteit
+
+News.Images YNpPaBNeHHe U306PaxKEHHAMM HOBOCTH
+
+News.ReactionSettings Hacrpoina peaxyni
+News
+
+Partners yopasnenne naptuepramn
+
+Payments ynpaanese nnarexann
+
+PosterCategory Ynpasneune KaTeropuamn MeponpunTHa
+
+Poster  vonaenexve noxauwamu nnowanox
+ServiceCategories YNPABNEHHE CEPECHBIMM KaTeTOpHAMH
+
+ServiceOfferToPlace ynpasnenne "Npegnoxenvamn" - caasu c KnMeHTaMn
+
+Schedule yYnpasnenne kanenaapem cuen
+
+UserFilter cocarenie gunerpei
+
+Widget Ynpasnevve HaCTpoiikaMn BHaKETaMM YK
+
+Acceptance.Analytics Acceptance anaiytics
+
+Acceptance.Form Acceptance.Form
+
+Acceptance.Form.Defect Acceptance Form Detect
+
+Acceptance.ResultComments 4cceptance. Resutcomments
+
+Acceptance.Result Acceptance Resutt
+
+Acceptance.Inspection Acceptance.inspection
+
+Acceptance.Record Acceptance Record
+
+Acceptance.Schedule Acceptance scneauie
+
+Acceptance.Statistics Acceptance Statistics
+
+Construction.Banners Construction Banners
+
+Bookings Bookings
+
+Construction.BookingTypes Construction BookingTypes
+
+Construction.BookingTypesForm Construction BookingTypesForm
+
+Construction.BuildingConstructionProgress Construction suildingconstructionProgress
+
+BuildingEntrances Buiidingentrances
+
+Construction. BuildingProjectBookingRate Construction. BuildingProjectBookingRate
+
+Construction.Filters Construction Fitters
+
+Construction.BuildingProjects Construction BuildingProjects
+
+Construction.BuildingProject construction ButaingProject
+
+BuildingSmartHomeSettings Buidingsmartiomesetiings
+
+BuildingGroups 8uiaingcroups
+
+BuildingSubGroups 8uidingsupcroups
+
+Construction.Bookings Construction.Bookngs
+(nat Chat
+
+Exploitation.Chat ©piitation chat
+
+ChatBotTag chatsottag
+
+ChatMessage Template ChatmessageTempiate
+
+CommunicationInitiatorTypes communicationinitiatortypes
+
+Communicationlnitiators Ccommunicationinitiators
+
+CompanyBlocks companysiocks
+
+CompanyPrices CompanyPrices
+
+Construction.BuildingProjectStatuses Construction Buiicingrrojectstatuses
+
+Construction.Chat Construction chat
+
+Construction.CompanyBlocks Construction CompanyBiocks
+
+Construction.Customers Construction.customers
+
+Construction.Import Constructon.mpon
+
+Construction.InitialData Construction initiaiata
+
+Internal.Construction.InitialData imema.constucton.initaibata
+
+Construction.News Construction News
+
+Construction.OfferRenovationTypes Construction.orerenovationtypes
+
+Construction.Poster construction Poster
+
+Promotion ®romoton
+
+Construction.Widgets Construction widgets
+
+NewAlerts Newaters
+
+PushToken Pusitoken
+
+SmartHome smartome
+
+Paywall Paywai
+
+Tags Tags
+
+Dashboard Dasnboara
+
+DataUpdate\Invoice Dataupaateunvoice
+
+DataUpdate\Place Dataupdateriace
+
+Debtors Debtors
+Departments Deparments
+
+Elevators Elevators
+
+FavoriteActions Favoriteactions
+
+Feedback Feedback
+
+GroupedTargets sroupectargets
+
+Internal.Exploitation.InitialData 'ntemai.expioitation initiadata
+
+InitialData.CustomerCenter initiaibata.customercenter
+
+InitialData.Dispatcher nitiabata dispatcher
+
+InitialData.Installment tniiaData.instaiment
+
+InitialData.Manager nitiaibata manager
+
+Spot spot
+
+MiniApps Miniapps
+
+InitialData.MediaServices intiaibata. meaiaservices
+
+InitialData.Schedule tnitiaata scneauie
+
+InitialData.Settings ntiavata.settings
+
+InitialData.Showcase lnitiaata showcase
+
+InitialData.SmartSystems intaivata. smartsystems
+
+Stories stories
+
+Internal.InitialData 'ntematintiainata
+
+Construction Installment Construction instalment
+
+Insurance insurance
+
+Construction.IntegrationSettings Construction integrationsettings
+
+Modules Modules
+
+Loyalty Statistic List (cyatty statistic vist
+
+Loyalty Statistic Graphic Loyatty statistic Graphic
+
+Menu Menu
+
+Construction Mortgage onstruction Mortgage
+
+News. Tags News Tags
+
+NPS nes
+OfferRenovationTypes orerenovationtypes
+
+Construction offerToCustomer Construction oferToCustomer
+
+Offers otters
+
+OrderBulkActions ©rcerBulkactions
+
+OrderTimeTracking rdertimetracking
+
+Orderstatuses orderstatuses
+
+Pass Pass
+
+PermanentPass Permanentrass
+
+Places/Files Piacesiriies
+
+Place Place
+
+Polls Pots
+
+Poll Pou
+
+Posters Posters
+
+ProductDemand Proauctoemana
+
+Construction.Promotion cConstuction.Promotion
+
+Public.Chat Puvic.cnat
+
+Regions Regions
+
+Construction.Regions Consiruction.Regions
+
+Reports Reports
+
+Roles ®ors
+
+ServiceFeedbackCategory seniceFeedbackcategory
+
+Service service
+
+Settings Settings
+
+Showcase.Chat showcase.cnat
+
+StorySlides storsiices
+
+Regions Regions
+
+Construction.Regions Construction Regions
+
+Reports Reports
+
+Roles ®oles
+ServiceFeedbackCategory seniceFeedbackcategory
+
+Service service
+
+Settings Settings
+
+Showcase.Chat showcase.cnat
+
+StorySlides storsiices
+
+UserNotification Usernotitcation
+
+UserWorkSchedule Userworschedute
+
+Schemas

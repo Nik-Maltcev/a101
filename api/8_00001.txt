@@ -1,0 +1,295 @@
+MntTerpayma c Jlomuneny
+
+MuTerpauma c Jlomuneny, 3aq BKU co cyetTa M “ Copepxanne
+
+O6uyme cBegenna Cnoco6 BbIz0Ba
+Tepmuubl 4 onpegeneHna Napamerppi sanpoca
+‘Tun! AaHHBIx NonyynTb 3anBkM CO CYeTaMU Napametpbi sanpoca
+APLCRM - Teno oTBeTa
+
+OGuMe CBegeHuA Teno oTBeTa (NPM OWM6Ke)
+
+Cnoco6 BbIsOBa
+
+Mimnopt > NpuMep Bbis0Ba
+xcnopT ~ GET ~/orders/invoices Mpumep oTBera
+O6beKTbI
+KnWeHTbI
+Nomewexna NMapamertpb 3anpoca
+
+Nokazanua MY
+
+Nokaszauua OANY
+
+inate NMapamertpp! sanpoca
+‘SaABKH CO CHETaMU
+Vimnopr (cTpomtenscteo) > ‘ATpn6yt Tan Onweanne OGa3aTenbHOCTS
+AaHHDIX
+SKcNopT (CTpOMTenbCTBO) =>
+Be6-xykn > searchQuery string C1poka nouca HeoGagaTenbetiii
+Npoume BosMOxKHOCTH >
+YcrapeBuime MeTopb! > fromRow int HoMmep cTpoku, Haya c KoTOpO!A KoTOpO! HeoOaaaTenbHbilt
+XML unrerpaua CRM > 6yneT Bo3apaujex cnicox, no yMonuaHuro O
+API MarketPlace > .
+rowLimit int KonmyecTso CTpok KoTOpble GyAyT Nony4eHD! HeobasaTenbHbilt
+Muterpauna c AC > cuntaa or fromRow napamerpa (n#60 ot nepsoit
+Aesenonepa erpokin)
+Mnyu-npwnoxenua >
+YMuoe 3fjaHne > placeld int MagexTubukatop nomeweHna HeoOrgaTenbHbli
+placeExtid string Buewniit moeHTuduKarop nomeweHua HeoOAsaTenbHbIit
+placeExtid string BHewHMa mgeHTmduKaTop iA
+buildingld int VigextuduKatop o6vexta HeoOAgaTenbHDIit
+buildingExtld string Buewniit mgeHTaduKarop obpeKra. HeoGazaTenbHbii
+buildingGroupids array Vigextmbuxatopel rpynn o6bextoB HeoSagatenbHblit
+customerid int MgextuuKatop KnvenTa HeobagaTenbHbilt
+companyld int Ecnm nepefano, To 6yAyT BOSBpaLlleHb! TONbKO HeoOagaTenbHbIA
+NOkagaHMA ANA yKazaHHOrO HOpMAMuecKoro NMYa
+serviceTypeld int MgexTupuKarop Tana yenyrn HeoOasaTenbHbilt
+serviceld int Viaextuduxatop yenyrn, MoxKHO MONyUnTb M3 HeoSazaTenbHblii
+cnincka ycnyr sanpocom GET /services
+createdAt timestamp ara coananna HeoBAgaTenbHbIt
+updatedat timestamp lara o6HoBneHna HeoSagatenbHblit
+inspectarid int MgextuduKatop CoTpyqHMka, KOTOpDIM BbIGpaH HeOOAgSTENbHbII
+KOHTPO/IEDOM 8 3aRBKE
+responsibleUserld int WaextuKatop oTpercTaeHHoro McnonHuTens, HeoBAgaTenbHbIit
+MOxkHO nony4nTe aanpocom GET /users
+responsibleDeptld int Vgextubuxatop oTeeTcTseHHoro. HeoSagatenbHblit
+enmcox ni it MOKHO
+nonyyntb sanpocom GET /departments
+orderStatusid int Vigentndukatop cratyca 3aABKH M3 CnoBaApA B HeoBAzaTenbHblit
+BTOM AOKyMeHTE
+isAccident bool ‘nar, ABNAeTCA nM 2anBKa aBapnen HeoGazaTenbHDiit
+orderSourceld int Kanan oGpauyenua - 43 cnosapa Ha 3Toi HeoSagatenbHblit
+cTpaHMe.
+rating int Ouenka HeobAsaTenbHbIit
+reactionTimes string ‘unvtp no npocpoyeHHoctn (SLA). Comma- HeoGAzaTenbHDIit
+separated none, cnucok id SLA, Hanpumep '1,3°
+hasStatusReopen bool ‘unetp no cTatyca NepeorKppiro 8 iA
+aaqBKe
+solveTimeSLA string Tepwog 'BbinonHuT go’ 8 bopmate 01.01.2022 HeOBAsaTeNbHbIlt
+
+00:00-15.01.2022 23:59"
+
+hasAttachment bool unbtp no Hannum BNOKeHHH HeoOrgaTenbHblit
+Teno oTBeTa
+Atpnéyt
+items[n].id
+items[n].orderStatusid
+
+items[n].orderStatusTitle
+
+items|n].createdAt
+
+items[n].invoiceCreatedAt
+
+items[n].paymentDate
+items[n].paidSum
+items[n].paymentid
+
+items[n]. paymentStatus
+
+items[n].beneficiaryCompanyTitle
+
+items[n].companyAccount
+items[n].placeAddress
+items[n].placeNumber
+items[n].serviceTitle
+
+items[n].responsibleDeptTitle
+
+items[n].responsibleUsers
+
+items[n].invoicettems
+
+items[n].nextRow:
+
+items[n].invoicettems{j].id
+
+items[n].invoiceltems|j] title
+
+items[n].invoicelterns[j].measureUnitTitle
+
+items|n].invoiceltems|].quantity
+items[n].invoicettems{j].rate
+items|n].invoiceltems|j].discount
+items|n].invoiceltems{].creditSum
+
+items[n].invoiceltems{j].refundsum
+
+Teno oTBerTa (npu OLuM6Ke)
+
+ATpu6yT Tun qanHpix
+
+userMessages array
+
+Mpumep BbI3s0Ba
+GET ~/orders/invoices
+
+AppName: app-test
+
+Maccue cTpok
+
+OnucaHne
+
+Ton Onncanne OGasaTenbHocTS
+AaHHbIX
+int Ugextucbuxatop cueta oasaTenbHbilt
+int ID ctatyca saKkaaza oBagaTenbHbilt
+string HaapaHme cratyca saKaza
+int Alara coagaxna sakasa oGasaTenbHbiit
+(timestamp)
+int Mara cospanmn cueta oBagaTenbHbilt
+(timestamp)
+int Alara onnatel (timestamp)
+float OnnauesHaa cymma
+int ID nnatexa
+string Cratyc onnare! (“Onnayex oGasaTensHbiit
+uepes Jomunexa™,
+“Onnayen mpyrum
+cnocoGom™, "He
+onnayex™)
+string Hanmenopanue
+nonyyatena
+string PacuerHpiii cueT
+string Agpec oOvexta
+string Homep nomeuyjexua
+string Hanmenopanue yenyrn
+string Hanmenopanue
+OTBETCTBEHHOTO
+noapasgeneHMa
+array Cnincok OTBeTCTBEHHEIX
+nonb3opateneit
+array Maccus nosmusli cueta obasaTenbHbilt
+(cM. HioKe)
+int Homep cTpokn ana oGasaTenbHIit
+NpogonKeHHA
+NocTpaHM4HOre BbIBOga
+int Wgextuuxatop nosMynn oGasaTenbHbilt
+string HanmeHosane nosy oBasaTenbHbilt
+string EQMHMua M3MepeHuA
+int Konwuecteo
+float Uexa 3a enuauuy
+float CymMa CKMAKH
+float Cymma « onnate
+float Cymma sosapara
+O6s3aTenbHOCTb
+ii 06 -
+
+Authorization: dnvf89kk01rbuumd2rkdufj8p1
+
+Mpumep oTBeta
+
+208 OK
+
+“items” :[
+
+“id": 12345,
+“orderStatusId" :
+“orderStatusTitle": “BbicTasneH cueT”,
+“createdAt": 1726185688,
+
+“invoiceCreatedAt": 1726189288,
+
+“paymentDate”: 1726275680,
+
+“paidSum": 57588.06,
+
+“paymentId": 555,
+
+“paymentStatus": “OnnayeH yepes flommneHy” ,
+“beneficiaryCompanyTitle": "000 Powawka",
+“companyAccount": “4670281648086080G001 ",
+“placeAddress": "r. Mockea, yn. NywkwHa, a. 1",
+“placeNumber": "12",
+
+“serviceTitle": “Apexja nomeweHna”,
+“responsibleDeptTitle”: “OTmen apexam”,
+“responsibleUsers": [
+
+{
+
+"id": 18,
+“fullName": "“MeaHos WeaH MeaHosuy"
+}
+]
+
+“invoiceltems": [
+
+wale 3]
+“title": “ApeHga nomeweHun",
+“measureUnitTitle": “mecay",
+“quantity”: 1,
+
+"rate": 58606.88,
+“discount”: 6.88,
+“creditSum": 58000.08,
+“refundsum": @.60
+
+"title": “KommyHanbHbie ycnyr",
+“measureUnitTitle": “mecauy",
+“quantity”: 1,
+
+"rate": 8680.08,
+
+“discount”: 508.88,
+“creditSum": 7508.60,
+“refundsum": @.60
+
+“id": 12346,
+
+“orderStatusId": 2,
+
+“orderStatusTitle": “BiicTasneH cueT",
+“createdAt": 1726185608,
+“invoiceCreatedAt": 1720189280,
+“paymentDate": 1726275660,
+
+“paidSum": 57580.06,
+
+“paymentId": 555,
+
+“paymentStatus": “OnnayeH yepes flommneHy",
+“beneficiaryCompanyTitle": “O00 Pomawka”,
+“companyAccount": “4670281648086080G601 ",
+“placeAddress": “r. Mockea, yn. [lywkKnHa, a. 1",
+“placeNumber": "12",
+
+“servicelitle": “ApeHfa nomeweHna”,
+“responsibleDeptTitle": “Otgen apenppi",
+“responsibleUsers": [
+
+{
+
+Saal 3 WG),
+"“fullName": "AsaHoe WeaH VeaHosny"
+}
+1,
+
+“invoicelItems": [
+
+“Apeuma nomeweHun” ,
+“measureUnitTitle": “mecay",
+“quantity”: 1,
+
+"rate": 58608.88,
+
+"discount": 8.20,
+“creditSum": 58008.06,
+“refundsum": @.68
+
+},
+
+{
+“id: 2
+“title": “KommyHanbHble yconyru" ,
+“measureUnitTitle": “mecay",
+“quantity”: 1,
+"rate": 8080.08,
+“discount”: 508.06,
+“creditSum": 7568.00,
+“refundsum": @.68
+
+}
+
+“nextRow" :28
+

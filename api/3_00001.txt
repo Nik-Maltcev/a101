@@ -1,0 +1,135 @@
+MuTerpauma c Jlomuneny,
+O6une cBegennA
+Tepmvubi m onpegenenna
+
+THN! Qa@HHbIX
+
+API CRM v
+
+OGuwMe cBeAeHHA
+
+Mmnopr >
+‘SkenopT v
+O6beKTbI
+KnMeHTbl
+NomewexHun
+
+NoxaszaHua MNY
+Nokasayua ONY
+naareKn
+SaABKM CO CueTaMH
+Vimnopt (cTpouTenbcTBo) =>
+
+‘KcNopT (cTpovTenbcTBO) =>
+
+Beé-xykn >
+
+Npouwe BO3MOXKHOCTH >
+
+YcTapeBuime MeTOsb! >
+XML unterpauna CRM >
+API MarketPlace >
+Muterpauna c AC >
+Aesenonepa
+Mvuu-npwnoenua >
+YmHoe 3gaHue >
+
+MntTerpayma c Jlomuneny
+
+SkKcnopT KIMECHTOB
+
+Nonyyntb cnucoKk KIMeHTOB.
+
+Cnoco6 BbIsOBa
+
+GET ~/customers
+
+Napamertpb! sanpoca
+
+ATpu6yT Tun OnucaHne
+AaHHEIX
+updatedAt string unstpaunn no gate O6HOBNeHKA S bopMaTe
+
+AA-MM.ITIT 44.MM:CC-00.MM.ITIT 44:MM:CC nnn
+OO.MM.ITTT-20.MM..TTT
+
+Teno oTBeTa
+
+Copepxanne
+
+Cnoco6 BbizoBa
+Napamerppi sanpoca
+Teno oTBeTa
+
+Teno OTBeTa (MPH OWM6Ke)
+Npumep BbIs0Ba
+
+Npumep orsera
+
+O6a3aTenbHoOcTb
+
+HeoOrgaTenbHbli
+
+Atpw6yT Tun Onncanne O6a3aTenbHocTD
+amie
+nextRow int HoMep CTPOKH,  KOTOpO! MOKHO NPOROMKMTE oGnsatenbHbilt
+nonyuesne cnncka,
+SHauenne Tpe6yerca nepegatb B GET napametpe
+fromRow cnegyrowero aanpoca, uT06eI nonyyvTh
+ouepegHyto nopuwio AaHHbIX. Ecnw nextRow == -1,
+SHaUNT B NocnegHeM 3anpoce GbinM NonyyeHb!
+ace ocrasuimeca cTpoKit
+items array Maccue o6bexT08, ONMcIBarOUyMX faHHble oOagatenbHbii
+senaexa
+items: {id} int UgentuuKarop knuenTa B CRM o6A3aTeNbHbI
+items: string Homep Tenedora knveHTa, ecnn Gbin ykagan
+{phoneNumber}
+items: {INN} string HH, ecn Goin ykasan
+items: string Mondoe HanmeHoraHue (Damunna + Ma +
+{fullName} Oruectso ana ois. slay.m MN)
+Teno oTBeTa (npu OLuM6Ke)
+ATpn6yT Tun gaHHbix OnucaHne O6a3aTenbHOcTb
+userMessages array Macene cTpok 1 06 ii
+
+Mpumep BbIsoBa
+GET ~/customers
+AppName: app-test
+
+Authorization: dnvf89kk01rbuumd2rkdufj8p1
+
+Mpumep oTBeta
+
+208 OK
+{
+“items” :[
+“id" :89,
+“firstName" :"Anexcen" ,
+“lastName" :"ApBaHecos”" ,
+“middleName" :"AnekcaH~posun" ,
+“phoneNumber “:"79211589890",
+“fullName Apavecos Anekced AnekcaHgposu4" ,
+“shortName":"Anekcea AsaHecos",
+
+"image" :"https:\/\/static.domyland.ru\/img\/profile\/mystery.jpg",
+
+“updatedAt" :"23.07.2817 @ 20:07:07",
+“email” :"avanesov@mail.ru",
+“customerTypeld":1
+{
+“id" :1363,
+firstName”:“Mropp”,
+“lastName" :"Bonowun",
+middleName" :"AHaTonbeanu",
+“phoneNumber " :"79372172815" ,
+fullName*:"Bonow“H Vrops AHdaTonbesn4",
+“shortName":"Wropb BonowmyH",
+“image” : “https :\/\/static.domyland.ru\/img\/profile\/mystery.jpg",
+updatedAt”:"19.05.2817 B 28:05:23",
+"“email":"",
+“customerTypeld" :1
+
+}
+
+1,
+“nextRow" :28
+

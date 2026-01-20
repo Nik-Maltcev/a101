@@ -1,0 +1,153 @@
+MntTerpayma c Jlomuneny
+
+MuTerpauma c Jlomuneny, 3 KC n fe) T o6be KTO B Copepxanne
+O6une cBegennA p Cnoco6 BbIz0Ba
+Tepmvubi m onpegenenna Napamerppi sanpoca
+THMb! AaHHbIX Nonyuutb cnucoK O6beKTOB. Teno oTBeTa
+API CRM v Teno OTBeTa (MPH OWM6Ke)
+O6wme cBeMeHMA Npumep BbIs0Ba
+Mmnopr > Cnoco6 BbIsoBa Npumep orsera
+okenopT ~ GET ~/buildings
+O6beKTbI
+KnMeHTbl
+NomeujeHna NMapamertpb 3anpoca
+Nokaszanua MY
+Nokaszanua ONY ATpH6yT Tun OnncaHne O6a3aTenbHOCTb
+naareKn ABHHBIX
+SaABKM CO CueTaMH
+updatedAt string unetpauna no gare obHoBneHHA 8 bopmaTe HeoGAzaTenbHbii
+Vimmopr (cTpowTenbcTBo) => AQ.MM.CTTT 44:MM-CC-0.0.MM.ITTT 44:MM:CC nnn
+3kenopT (CTpovTenbcTBO) => 20.MM.CTTT-20.MM.crrr
+Beé-xykn >
+Npouwe BO3MOXKHOCTH >
+YcTapeBuime MeTOsb! >
+XML unterpauna CRM > Teno OTBETAa
+API MarketPlace >
+Usrerpaunac Me > Atpn6yt Tan Onncanne OGazaTenbHocTe
+fleBenonepa AaHHbIX
+Mvuu-npwnoenua >
+nextRow int Homep cTpokn, ¢ KOTOpOM MoxKHO oGnsatenbHbilt
+YmHoe 3gaHue >
+
+NponomkuTe NonyyeHHe cnHcKa.
+SuaueHne TpeGyerca nepenarb &
+GET napamerpe fromRow
+cnepytoujero sanpoca, uTo6et
+TonyyMTp o4epenHyto nopywio
+AaHubix. Ecru nextRow == -1, sHauHT
+B nocnegHem sanpoce 6bin
+TlonyUeHbI BCe OCTaBLIMeCR CTpOKH.
+
+items array Maccue ofbekTos, onucbIBarouyyee o6agatenbHbilt
+(AaHHbIe ofbeKTOR
+
+items[n].id int MgextuduKatop o6bexTa & CRM. O6A3aTeNbHbII
+
+items|n].extid string MgexTubukarop o6bexTa go
+
+BHeWHeM cHcTeMe, ecnn bin yKasaH
+
+items)n].title string Haapanve o6bexta oGagatenbHbli
+items[n].address. string Nonkblit anpec o6pexTa
+itemsfn].street string Ynuua
+items[n].houseNumber string Homep goma
+items[n].entrancesCount int KonwyectBo nopbesfnoB
+items|n].protectedArea boo! Bxntouewa sin aaKportan oGpgatenbHbli
+Teppuropua.
+O-Her;
+1- aa;
+items[n].onlinePayment bool Binioyenbi ni oHnait nnatexKn. oGpgatenbHbii
+O-Her;
+1-aa,
+items[n].companyld int MgextuuKatop top. nya & CRM OOAsaTENbHbII
+items[n].companyTitle string Hanmerogake top. nya, oGAgaTenbHbIit
+ynpasnatowero oGbeKTOM:
+items|n].companyLegalName string Tonvoe HauMeHoranne Hop. niu,
+ynpasnarowero oGbekToM
+items[n].buildingTypeld int Mgextu@wkatop Tuna o6bexTa: OOFsaTeNbHbIA
+
+1 - MHOrokBapTupHbiii ZoM;
+2-KoTTepKHblii nocenoK;
+3- ABTOCTORHKA;
+
+4- Dpyroe;
+
+items[n].buildingTypeTitle string Haapanne Tina obpexta oGpzatenbHbii
+items|n].buildingTypeShortTitle string Kparkoe Hassanne THna o6BeKTa oGagatenbHblit
+items[n].buildingProjectid int f null Mgextudukatop npoexta (KMNOro
+
+kOMMneKca) BUTPHHI
+HeABwKUMOCTH B CRM
+items[n].buildingProjectTitle string/ null —- Haapane npoekra (kunoro oGagaTenbHbIi
+komnnekca) BMTpHHBI
+
+HeABWwKUMOCTH
+items[n].buildingGroupid int / null Mgextudukatop rpynnbt o6bexTos 8
+cRM
+items[n].buildingSubGroupid int / null MpeHTHdnkaTop KBapTana 8 CRM
+Teno oTBeTa (Npu OLLINGKe)
+ATpHoyT Tun paHHbix — Onucane O6azatenbHOCTS
+userMessages array Macons crpox (cooduyennit 06 oumbxax) oOpgatenbHblit
+
+lpumep BpisoBa
+GET ~/buildings
+AppName: app-test
+
+Authorization: dnvf89kk01rbuumd2rkdufj8p1
+
+lpumep oTBeTa
+
+208 OK
+
+"items": [
+{
+
+“id": 5015,
+"extId": "fgfggf-gdafvgdfgfd-gdf fdsgdfd34123fd",
+“title": "KK Bonokonamck",
+“address": “Mockosckan o6n, r Bonokonamck, npoesg WaxoscKod 2-A, g 25",
+“street”: “npoesg Waxosckow 2-4",
+“houseNumber
+
+“entrancesCount" :
+“protectedArea": 1,
+
+“onlinePayment": 1,
+
+“companyld": 2,
+
+"note": "",
+
+“companyTitle*: “Teppa BaHun",
+“companyLegalName": "000 «Teppa BuHun»",
+“buildingTypeld": 1,
+“buildingTypeTitle": “MHoroksapTupH
+“buildingTypeShortTitle": "MK",
+“puildingProjectId": null,
+“buildingProjectTitle": null
+
+“dfghjklposiaiidshjdhsj",
+
+"KK Keaptan",
+“address": “r Mockea, JleHMHrpagcKui np-KT, A 63",
+“street": “NewwurpagcKmi np-KT",
+“houseNumber": “g 63",
+“entrancesCount": 4
+“protectedArea": 1,
+“onlinePayment": 1,
+“companyId": 8,
+“note”: null,
+“companyTitle": "Tno6an Cepsuc",
+“companyLegalName": "“[no6an cepauc",
+“buildingTypeld*: 1,
+“buildingTypeTitle": “MHoroksapTupH
+“buildingTypeShortTitle": “MKJ",
+“buildingProjectId": null,
+“buildingProjectTitle": null
+
+}
+
+]
+
+“nextRow": 36
+

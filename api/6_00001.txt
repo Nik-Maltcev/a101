@@ -1,0 +1,215 @@
+MntTerpayma c Jlomuneny
+
+MuTerpauma c Jlomuneny,
+O6uyme cBegenna
+Tepmuubl 4 onpegeneHna
+‘THM! A@HHBIX
+API CRM v
+O6uve cBegeHHA
+Mimnopt >
+2KenopT v
+O6beKTbI
+KnMeHTbI
+Nomewenma
+Nokazanua MY
+Nokasauua OANY
+NnaTexu
+‘SaABKH CO CHETaMU
+Mimnopr (cTpowtenbcTBO) =>
+
+SKcNopT (CTpOMTenbCTBO) =>
+
+Beé-xyku >
+
+Npoume BosMOxKHOCTH >
+
+YoTapesuime MeTOgbI >
+XML wuTerpauna CRM >
+API MarketPlace >
+Muterpauna c AC >
+Aesenonepa
+Mnyu-npwnoxenua >
+YmuHoe 3QaHne >
+
+GET ~/met
+
+Cnoco6 BbIsOBa
+
+g-general-data
+
+Napamertpb! sanpoca
+
+ATpu6yT Tun
+AaHHEE
+fromRow int
+buildingld int
+buildingGroupid int
+buildingSubGroupid int
+buildingExtld string
+meteringTypeld int
+meteringGroupid int
+submittedAt string
+isLast int
+
+Teno 3anpoca
+
+OtcyteTByeT
+
+Teno oTBeta
+
+Arpn6yt
+
+nextRow
+
+items.
+
+items[n].buildingextid
+
+items[n].meteringTypeld
+
+items[n]. meteringDeviceExtld
+
+items[n]. meteringDeviceNumber
+
+SKcNOpT noKasaHul OFNY
+
+NonyyeHue cnvcka nepefaHHbix noKasaHu OANY.
+
+OnncaHne
+
+C Kakoii CTPOKM NPOAOMKMTE BbIBOG AaHHbIX,
+
+TIpH nepeom ebisoge nepenagare 0.
+
+Upextndikatop o6pexra
+
+Vigextndnkatop rpynnti o6bexra
+
+Mgeutnnkatop KBaptana o6bexta.
+
+BuewHnit neHTaduKarop obpeKra.
+
+Migeutadbnkatop THna cueTunKa
+
+Maentidnkarop Thna nokagaHnii cueTanka
+
+Awanaaox UNIX_TIMESTAMP.
+Mpwmep 1553990400-1553990900.
+BpemeHan MeTKa nogaum noKasaHHi.
+
+Ecnw 1 - 6ygyT BosepaulleHe! Tonbko nocnegHMe
+akTyanbHble noxasaHa, ecru O - 6yayT
+BOSBpAllleHbI BCe KOTMa-NH6o COXpaHeHHbIe
+noKasaHnA.
+
+Tun ‘Onucanne
+AAHHEIX
+int Homep cTpOKH, ¢ KOTOpOl MOKHO
+
+NPOROMKuTS NoNyueHHe CHuCKa
+SHaueHne Tpe6yeTca nepegatp &
+GET napamerpe fromRow
+cneayrouero sanpoca, uTOOpI
+TOAYUMTE OUEpEAHY!O NOPLMIO
+AaxHoix. Ecnu nextRow ==-1,
+SHaUNT B NOCMegHEM Zanpoce
+ObInH nonyueHbI Bce ocTasuMecA
+‘CTPOKH.
+
+array Maccue ofpextos, onvcbisaiouyali
+
+AaHHbie NoKasanni ONY.
+
+int Tun npuGopa:
+1. Xonoguoe sogocuadsKenne
+2. Topruee BogocHadxenne
+3. QnexTpuuectEo
+(OQHOTAapHpHbIii)
+4. SnexTpuuectBo (nMK- HOUb)
+5, Snextpuyecteo (nMK- HOub- n/
+nu)
+6, OTonneHne
+7.faa
+8, Bogoorpegenne
+
+BHeWHM MQeHTHpHKaTOp npuGopa
+yuera.
+
+string Cepuittibiii Homep npuGopa yuera
+
+BHewHMii naeHTHObiKaTOP OSbeKTa.
+
+Copepxanne
+
+Cnoco6 BbizoBa
+Napamerppi sanpoca
+Teno sanpoca
+
+Teno oTBeTa
+Npumep BbIs0Ba
+Npumep orsera
+
+O6a3aTenbHoOcTb
+
+o6AsaTenbHbiit
+
+O6s3aTenbHOCTb
+
+items[n].valuet decimal Texyujee nokaaaHme no Tapady 1
+
+(nu).
+
+items[n].value2 decimal Texyujee nokaganue no Tapucy 2
+(Houp).
+
+items[n].value3 decimal Tekyujee noKasaHue no Tapudy 3
+(n/nx).
+
+items|n].previousValue1 decimal Mpeabiaywiee nokagaHne no
+
+Tapdy 1 (rink),
+
+items|n].previousValue2 decimal Npeabipyuee nokasaHne no
+Tapndy 2 (Hous).
+
+items[n].previousValues decimal Npegbigyuee nokasanne no
+Tapwdy 3 (n/nMk).
+
+items|n].submittedat timestamp Jara nogaun Texywero nokazaHiA.
+
+lpumep BbIsoBa
+GET ~/metering-general-data?buildingld=123?isLast=1
+AppName: app-test
+
+Authorization: dnvf89kk01rbuumd2rkdufj8p1
+
+Mpumep oTBeta
+
+208 OK
+{
+"items" :[
+{
+“id": 2098,
+“buildingId": 2,
+“buildingExtId": “bde5564b-3ecc-4573-a901-0a0584ed2Fd4",
+“meteringDeviceExtId": “adeS564b-3ecc-4573-a9@1-@a@584ed2 fd4",
+“meteringDeviceNumber": "9788887",
+“meteringTypeld": 8,
+“meteringlypeTitle": “BogooTsegeHue”,
+“meteringTypeShortTitle": "BO",
+“meteringGroupId": 5,
+“valuei": “2190.6060",
+8.6888",
+‘ : “@.6088",
+“previousValuei": "“262@.0080",
+“previousValue2": "6.6860",
+“previousValue3": “@.e9ee",
+“submittedAt": 1553998486,
+“prevSubmittedAt": null,
+“isLast": 1
++
+]
+}
+
+nd Team
+

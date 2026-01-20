@@ -1,1 +1,241 @@
-
+MuTerpauma c Jlomuneny,
+O6une cBegennA
+Tepmvubi m onpegenenna
+THN! Qa@HHbIX
+API CRM
+OGuwMe cBeAeHHA
+Mmnopr
+2kenopt
+Vmnopt (cTpouTenbcTBO)
+Skenopr (cTpovtenbcTBo)
+Be6-xykn
+Npouve BosMoxKHOCTH
+YCTaPeBLUIME METOAb!
+XML MuTerpaunAa CRM
+API MarketPlace
+
+MuTerpauna c MC
+Aepenonepa
+
+MVHY-npunoxKeHMA
+YMHOe 3Q.aHHE
+
+MntTerpayma c Jlomuneny
+
+O6une cBegeHuA
+
+Pasgen cogepxuT onucaHme MeTogos API Ana 6as0B0K uHTerpayMu c CRM Jlomunena.
+
+CM. Tatoxe TepMMHbI M ONpeseNneHuaA.
+
+Mpvkumnbi pa6ote! API
+
+API npvHuMmaer ganpoce! c McnonbsOBaHveM CTaHAapTHbIx HTTP meTogos GET, POST, PUT,
+DELETE Ana, COOTBeTCTBEHHO, NONyYeHMUA, OGHOBNEHHA, AO6aBMeHMA M yaneHUA
+MHdopmauun.
+
+Aoctyn k API ocywecTenaetca TOMbKO No npoToKony HTTPS.
+
+NonesuHaa Harpyska ana POST nw PUT MeTogos nepegaetcn B Tene 3anpoca B dopmate
+JSON.
+
+Napametpbl sanpoca nepegatotca Kak GET napamerppl.
+
+HaspaHiiA BCex MepefaBaeMbIX NapaMeTPOB ABMAIOTCA PerMcTPOSaBHCHMbIMM
+(caseSensitive).
+
+Jio60H% 3anpoc K API AOmKeH GbITb VMACHTMMKLMPOBAH Ha YPOBHE BbISbIBAaHOLero
+NpwnoxKenua, nostomy O60 3anpoc AoKeH Bcerga HTTP saronoBok copepxkaTb
+AppName: <string>
+
+Zina KoppekTHoro onpegeneHMA YaCoBoro NoACca B KaxKMOM Zanpoce HeOGXOQMMO
+nepegaBatb HTTP saronosok TimeZone: , Hanpumep TimeZone: Europe/Moscow. Cnucok
+NogAepKuBaembIx YacoBbIX NoACoB https://www.php.net/manual/ru/timezones.php
+
+BonbWwMHCTBO 2anpocoe K API Tpe6yroT aBTOpMalMu Ha YPOBHE NOMbsOBaTeNA, NOSTOMY
+TakMe 3aNPOCbl JONONHUTENbHO AOMKHbI CONPOBOK ATCA HTTP 3aronoBKOM
+Authorization: <string> (cm. AyTeHTHpuKalna)
+
++ B 3aronoBkax oTBeTa API BosBpalljaetTca CTaTyc onepaMM B BUge CTaHAapTHoro HTTP
+Kona:
+* 200 - QnA yCNeLIHO BbINONHeHHbIX ZaNnpocos;
++ 4xx- 218 MHAMKaLMM OLUMGKM M3-38 HEKOPPeKTHbIX BXOQHbIX aHHbIX;
++ OXX - (UIA MHOMKaUAM BHYTPeHHeH OWM6KH.
+
+* Btene otseta CcOmepKKTCA wHdopmayna 0 pe3ynbTaTe BbINONHEHMA Zanpoca MW NoNnesHaAn
+Harpy3ka B @opmate JSON.
+
+®opmat oTBeTa
+
+Npwv ycnewHoM BbINONHeHMM ONepalMu
+
+Arpn6yT Tun naHHx = OnncaHHe
+attribute1 someType Peaynbtat sanpoca
+attribute2 someType Peaynbrat sanpoca
+a someType Peaynbtat sanpoca
+attributeN someType Peaynbtat sanpoca
+ny - 14 o
+
+GET ~/customers/1
+
+AppName: app-test
+
+Authorization: dnvf89kk01rbuumd2rkdufj8p1
+
+Tipumep oTBeta
+208 OK
+{
+"id" :"76",
+
+“customerTypeld":"1",
+“phoneNumber":"+7 (999) 161-81-@1",
+“email” :"ivan@domyland.ru",
+“firstName" :"MBaHoB",
+
+“LastName” : “Maan”,
+
+“middleName" : “MaaHoenu"
+
+Npu ownéke
+
+Crone puinanionua aannn|s ananunt annananate an HTTD vamrornara Pinu naamiunianocia
+
+Copepxanne
+
+NpwHunnb! pabote! API
+@opmar oTBeTa
+
+Npw ycnewHom BbINOAHEHMM
+onepaynn
+
+Np owméKxe
+ACHHXPOHHBIi PexKUM
+AyTeHTMOnKalMa
+
+Cnoco6 BbI30Ba
+
+Teno sanpoca
+Viaryy OUIIWINcHNA sanpuLe WIcAye! UNpCAGINIB ny oni) Kugy UID Ia. Hipw D¥SMMRNMUDSAN
+
+OWMSKH (Kog OTBeTAa != 200), Teno OTBeTa 6yMeT COMepKaTb CTAHMAPTHble aTPMGYTHI:
+
+‘ATpHGyT Tun Onucanne OGazaTenbHocTh
+AaHHDIx
+errorText string Texct ow6ku (ncnonsayetca ana ornapKi) oGagaTenbHbiii
+userMessages array Crucok i (ana obnaa A
+nonbsoparents)
+
+Mipumep 3anpoca
+
+GET ~/customers/123456
+
+AppName: app-test
+
+Authorization: dnvf89kk01rbuumd2rkdufj8p7
+Tpumep oTgeta c owH6KOH
+
+404 NOT FOUND
+
+“errorlext":"Customer not found",
+“userMessages™ :[
+“KnweHT He HaiigeH”
+
+]
+
+ACMHXPOHHbI pe KUM
+
+HekoTopble MeTOJbI MMNOpTa AaHHbIX NOAAePKMBAalOT aCHHXPOHHbIM PEXMM BbINOMHEHMA, NPM
+KOTOPOM B MOMEHT BbI30Ba MeTO4a API 6ygeT NpousBefeHa MMHMMa/ibHaA BanMgaunAn
+BXOQHbIX MaHHbIX M Chasy BOSBPALlleH YCNeWHbI OTBeT, a HeNOCpeACTBeHHO ONnepayMA
+MMnopTa 6yeT NPoQOMKeHa B Move. CTaTyc MW PesyMbTaTbI BBINONHEHUA MO)KHO GyfeT
+OTCNEQMTb OTAeNbHbIM API ganpocom no taskLogld “3 oTBeTa WM B MHTepdelice CRM.
+
+B CMHXPOHHOM Pe@KMMe OTBET He Gy1eT BOSBpAaleH MO Tex Nop, NOKa MMMOpT He 6yAeT
+NOMHOCTbIO BbINGNHEH, NPM STOM BOSMO>KeH BHesanHbid O6pbiB HTTP coeqMHeHMA NO
+Talimayty (OKoN0 3 MMHyT). HecMoTpa Ha O6pbiB CoeqMHeHMA, ONepaulMA GyaeT NPosomKeHAa.
+
+ACMHXPOHHbI PeXUM PEKOMEHAYETCA MCNONb3O0BaTb NPA MMMopTe OT 100 EAMHML AAHHbIX.
+
+AyTeHTndukalna
+AjavHbIK cnocoé ayTeHTHMuKayM NpAMeHAeTCA Beb-cepBucamu CRM uw CRM Market.
+
+Metog npunumaer Ha BxXOf Napy email:password NombsoBaTena M BOsBpaujaeT token
+ayTeHTHMKaL|MU B Cnyyae ycnexa.
+
+© Baxno
+
+Nocne ycnewHod aytentnvKaunn HeaGxonnmo CoxpaHiTs NonyyeHHbllt token c Wenbto ero AanbHeMwero
+MCnomb30BaHHA Ann OOpaleHHA OcTaNbHbIM MeTogaM API.
+
+Bpema KuHU token'a OrpaHMuEHO 1 MecaLiem M nposeBaeTcA KaXAbIM pas NPM ero ucTONbsOBaHUM.
+
+Taku 06p830M, pl AKTHBHOM Hcnosb308aHun token’a BDEMA eFo KUSH He OrPBHMUEHO.
+
+Nos ayTent (Tb TONbKO ECAH BbISOB KaKOrO-nKGo MeToga API
+saBepwianca kogom 401 Unauthorized.
+
+Hi IMO BBINONHATE ayTeHT THO, HANPMMeP Nepeg Ka)KJbIM BbIZOBOM MeTOAa API,
+Tpe6yowero aBTOpNZalMH - B NPOTHBHOM cnyyae Balla CMCTeMa MOoKeT ObITh aBTOMaTHYeCKM 3aGnOKKpoBaHa.
+
+Cnoco6 BbI30Ba
+
+POST ~/auth
+
+Teno 3anpoca
+
+Haseanne Tun OGazarenbHocTa —-Onlicanne:
+email string oOagaTenbHbtlt Email agpec nonbaosatena
+
+password string odagaTenbHbtlt Maponb nonbsopaTena
+
+tenantName string oGsaTenbHEt Koa yuerHoi aannen (<kog>.domyland.ru)
+
+Teno oTBeTa
+
+token string Mpextndvkarop cece, koTopbilt Heo6xogMMo nepegaBatb B HTTP
+saronoske Authorization 8 nocnepyroulnx BbIZOBaX
+
+Npumep BbI3z0Ba
+POST ~/auth
+
+AppName: app-test
+
+{
+“email” :“user@domain.com",
+“password”: "secret",
+“tenantName":"test"
+
+}
+
+TNpumep oTBeta
+
+208 OK
+
+“token” :"“dnvf89kk01 rbuumd2rkdufj8p1 "
+
+Npumep otBeta (OWwM6Ka)
+
+408 Bad request
+
+{
+“errorText Bad request",
+“userMessages" :[
+“HepepHbli email agpec uni naponb"
+]
+}
+Bpixog,
+
+MeTog 3aBepwaeT pales OTKPBITYIO CeccHtO.
+
+Npumep Bbi3z0Ba
+DELETE ~/auth
+AppName: app-test
+
+Authorization: dnvf89kk01rbuumd2rkdufj8p1
+
+Npumep oTseta
+
+MeTog He BOsBpallaeT AONONHMTeNbHbIX DAHHbIX
+
+Domyland Team
+

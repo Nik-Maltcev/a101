@@ -9,6 +9,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.api.jobs import router as jobs_router
+from app.api.domyland import router as domyland_router
 from app.config import settings
 
 # Configure logging
@@ -43,6 +44,7 @@ app.add_middleware(
 
 # Include API routers
 app.include_router(jobs_router)
+app.include_router(domyland_router)
 
 # Mount static files
 app.mount("/static", StaticFiles(directory=str(settings.STATIC_DIR)), name="static")

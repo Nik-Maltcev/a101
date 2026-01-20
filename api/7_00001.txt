@@ -1,0 +1,230 @@
+MuTerpauma c Jlomuneny,
+O6une cBegennA
+Tepmvubi m onpegenenna
+THN! Qa@HHbIX
+API CRM
+OGuwMe cBeAeHHA
+Mmnopr
+2kenopt
+O6beKTbI
+KnMeHTbl
+NomewexHun
+Nokaszanua MY
+Nokasayua ONY
+naarekn
+SaABKM CO CueTaMH
+Vimnopt (cTponTenbcTBo)
+3kenopt (CTpovTeNbCTBO)
+Beé-xykn
+Npouwe BO3MOXKHOCTH
+YcTapeBuime MeTOsb!
+XML unterpauna CRM
+API MarketPlace
+
+Muterpauna c AC
+Aesenonepa
+
+Mvuv-npwnoxeHua
+
+YmHoe 3gaHue
+
+MntTerpayma c Jlomuneny
+
+OKCNOpT nnaTexer
+
+Nonyyenve cnvicka MlaTexkeli, COBePLUCHHbIX KNMeHTaMH B JIK.
+
+Cnoco6 BbIsOBa
+
+GET ~/payments
+
+Napamertpb! sanpoca
+
+ATpH6yT Tun ‘Onucanne
+AaHHEIX
+
+dateTime string
+11.01.2019
+
+fromRow int C Kakolt cTpoKM npogomkurp BbiBog,
+
+AaHHbIX, NP NepBoM BbIsoBe NepeAaBarh 0
+
+invoiceTypeld string Ecsin mepefaHo, To peaynbtar 6yaet
+
+COfepXaTb TONbKO NNaTEXKU MO
+
+COOTRETCTBYIOUMM THNAM ONMAYEHHOTO
+
+cueta. MookHO nepemaTb HecKONbKO
+SHaUeHMi Uepes ,
+
+companyExtid string Migextndukatop opuguueckoro nuua.
+
+HeoGxoqumo npegeapnTenbHo sagaTb
+
+SHaUeHHe B Mone «<BHEWHHi
+
+WOexTHuKaTOp» B KapToUKe Hop. NMya.
+
+companyAccountExtld string Mnentuduxatop pacuetHoro c4eta top.
+
+Tua.
+
+Teno 3anpoca
+
+OtcytcTByeT
+
+Teno oTBeTa
+
+Arpa6yT Tun ‘Onwcanne
+
+nextRow int Homep cTpoku, c KoTOpoli MoXxHO
+
+Npo_OMKuTS nonyweHHe cnucKa.
+
+‘SHauenne TpeGyetcs nepenatb 8 GET
+
+napamerpe fromRow cnenyroujero
+
+sanpoca, YTo6bI NONYYAT ONepenHy!O
+Nop\wio JaHHbIX. EonM nextRow =--1,
+
+SHaUMT 8 nlocnenHeM sanpoce Guinn
+NonyWeHbl 8ce OCTABLUMECA CTPOKM.
+
+items array
+
+items[n].id int MgenTnpnxatop nnarexa.
+
+Baro! YHKanbHbIM MeHTHMcHKaTOpOM
+
+nnatexka OTHOCHTENbHO Hop. Ma
+
+ReNAeTCA KOMONHayMA aTpUByTos id +
+
+companyld + invoiceTypeld
+
+items[n].companyid int
+Domuneng,
+
+Twin onnayerroro cyeTa:
+1 -KKY
+
+items[n].invoiceTypeld int
+
+2 KanmtanbHblit peMoHT
+3- fon. ycnym
+4 Boega Ha Tepputopno
+items[n]. paymentStatusid int Ctarye onnaret:
+3- MonTsepxgen
+4- OTmeneHt
+8 - Boappaujsx
+9 - BosppauiéH vacTH4Ho
+
+items[n].customerExtid string
+Mpa Mniopre KnMeHTOB
+
+items[n].accountNumber string Homep nuyesoro cyeTa
+
+Nepuog onnatsi 8 dopmare DD.MM.YYY-
+DD.MM.YYY, nii6o -, Hanpimep 10.07.2019-
+
+MaccHs OGbeKTOB, AaHHble No onaTaM
+
+Vigertnnkarop top. nya 8 eucTeme
+
+Uperrnipukarop KnveHTa, nepeqaHHbli
+
+Copepxanne
+
+Cnoco6 BbizoBa
+Napamerppi sanpoca
+Teno sanpoca
+
+Teno oTBeTa
+
+Teno oTBeTa (NPM OWM6Ke)
+NpuMep Bbis0Ba
+
+Npumep orsera
+
+O6a3aTenbHoOcTb
+
+oGAsaTenbHblit
+
+OGs3aTenbHocTb
+
+oOAsaTeNbHbIiA
+
+oGAgaTENbHbIM
+
+items[n].totalsum decimal CymMa nnaTexa
+
+items[n].refundSum decimal CyMMa BosBpaTa
+
+Teno oTBerTa (npv OuuM6Ke)
+
+ATpH6yT Tun paHubix — Onucane OGasatenbHocTS
+
+userMessages array Macene cTpox ( 4 06 obnaa
+
+lpumep BbIZsoBa
+GET ~/payments?fromRow=-0
+AppName: app-test
+
+Authorization: dnvf89kk01rbuumd2rkdufj8p1
+
+Mpumep oTBeta
+
+208 OK
+
+‘items": [
+
+“id": 1856,
+“extId": "1856-3 ",
+“customerId": 5,
+"“paymentTypeld": 1,
+‘receiptErrorCount”
+“receiptSuccessCount": 6,
+“authCode": null,
+“cardMask": null,
+“invoicelTypeTitle": "KY"
+"invoiceTypeShortTitle"
+"“paymentStatusId": 3
+‘paymentStatusTitle
+"paymentStatusColor
+“invoiceld": 147496,
+
+"“invoiceTypeld": 1,
+
+“‘totalSumWithCommission": "16879.@590",
+“totalSum": “18879.8588",
+
+“dateTime": 1521646998,
+
+“‘refundSum": “@.@880",
+“paymentServiceCommissionValue": "188.79",
+“updatedAt": 1521646998,
+
+‘customerName": “PeweTHAK AnekcaHpp Bnaguuuposny",
+
+KY"
+
+“TloaTBepKaeH " ,
+: “#ecffec",
+
+“custome rExtId" .
+“accountNumber": "9811849890",
+
+“address": “yn. Kyty30aa, q. 11, Kopn. 4 KB 9",
+‘paymentServiceld": 1,
+
+"“paymentServiceName": "PayU_main",
+
+“buildingExtId": “6@cab328-5735-11e3-bf95-6c626d46db01"
+
+}
+
+“nextRow": -1
+
