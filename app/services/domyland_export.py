@@ -208,6 +208,8 @@ class DomylandExportService:
             
             row = {
                 "id": order.get("id"),
+                "serviceId": order.get("serviceId"),
+                "serviceInternalTitle": order.get("serviceInternalTitle") or "",
                 "ФИО": order.get("customerFullName") or order.get("customerShortName") or "",
                 "Телефон": order.get("customerPhoneNumber") or "",
                 "address": address,
@@ -224,7 +226,7 @@ class DomylandExportService:
             data.append(row)
         
         return self._write_to_excel_ordered(data, output_path, "Orders", 
-            ["id", "ФИО", "Телефон", "address", "placeNumber", "placeId", "placeExtId", "title", "valueString", "valueText", "Фото", "extId", "createdAt"])
+            ["id", "serviceId", "serviceInternalTitle", "ФИО", "Телефон", "address", "placeNumber", "placeId", "placeExtId", "title", "valueString", "valueText", "Фото", "extId", "createdAt"])
     
     def _write_to_excel_ordered(
         self, 
