@@ -105,31 +105,61 @@ class DomylandExportService:
         """Export orders to Excel.
         
         Exports fields: id, address, title, valueString, valueText, extId, createdAt
+        
+        Field mapping:
+        - valueString: answers from dropdown/checkbox fields (e.g. "Стеклопакет ПВХ: поврежден")
+        - valueText: text from comment fields (e.g. "Окно 2 1Царапины... 2Отслоение...")
+        
+        Comment fields are identified by elementTitle containing keywords like:
+        - "комментарий", "описание", "укажите", "опишите"
         """
         raw_data = await self.client.get_orders_with_invoices(
             building_id=building_id,
             created_at=created_at,
         )
         
+        # Keywords that indicate a text comment field (case-insensitive)
+        comment_keywords = [
+            "комментарий", "описание", "опишите", "укажите", 
+            "напишите", "введите", "текст", "примечание"
+        ]
+        
+        def is_comment_field(elem_title: str) -> bool:
+            """Check if element is a free-text comment field."""
+            if not elem_title:
+                return False
+            elem_lower = elem_title.lower()
+            return any(kw in elem_lower for kw in comment_keywords)
+        
         # Transform data to extract only needed fields
         data = []
         for order in raw_data:
             order_elements = order.get("orderElements", [])
             
-            # Collect all values and element titles
-            value_strings = []  # valueTitle - actual values
-            value_texts = []    # elementTitle - field names
+            # Separate values into dropdown answers vs text comments
+            value_strings = []  # Answers from dropdowns/checkboxes
+            value_texts = []    # Text from comment fields
             
             for elem in order_elements:
                 val_title = elem.get("valueTitle")
                 elem_title = elem.get("elementTitle")
                 
-                if val_title:
-                    value_strings.append(str(val_title))
-                if elem_title:
-                    value_texts.append(str(elem_title))
+                if not val_title:
+                    continue
+                
+                val_str = str(val_title).strip()
+                if not val_str:
+                    continue
+                
+                # Check if this is a comment field based on element title
+                if is_comment_field(elem_title):
+                    # This is a free-text comment - goes to valueText
+                    value_texts.append(val_str)
+                else:
+                    # This is a dropdown/checkbox answer - goes to valueString
+                    value_strings.append(val_str)
             
-            # Remove duplicates
+            # Remove duplicates while preserving order
             value_strings = list(dict.fromkeys(value_strings))
             value_texts = list(dict.fromkeys(value_texts))
             
