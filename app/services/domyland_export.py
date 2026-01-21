@@ -15,8 +15,50 @@ logger = logging.getLogger(__name__)
 class DomylandExportService:
     """Service for exporting data from Domyland API to Excel files."""
     
+    # Markers that indicate start of defect descriptions
+    DEFECT_MARKERS = [
+        "Оставьте свой комментарий с описанием дефекта",
+        "комментарий с описанием дефекта",
+        "описание дефекта",
+    ]
+    
     def __init__(self, client: DomylandClient):
         self.client = client
+    
+    def _extract_defect_text(self, text: str) -> str:
+        """
+        Extract defect description text from customerSummary.
+        
+        The text before markers like "Оставьте свой комментарий с описанием дефекта"
+        is metadata (location, type, etc.), not actual defects.
+        We extract only the text AFTER such markers.
+        """
+        if not text:
+            return ""
+        
+        text_lower = text.lower()
+        
+        # Find the last occurrence of any marker
+        last_marker_pos = -1
+        last_marker_end = 0
+        
+        for marker in self.DEFECT_MARKERS:
+            pos = text_lower.rfind(marker.lower())
+            if pos > last_marker_pos:
+                last_marker_pos = pos
+                # Find the end of this marker phrase (after ":" or end of line)
+                marker_end = pos + len(marker)
+                # Skip past any trailing characters like ":" or whitespace
+                while marker_end < len(text) and text[marker_end] in ":) \t":
+                    marker_end += 1
+                last_marker_end = marker_end
+        
+        if last_marker_pos >= 0:
+            # Return text after the marker
+            return text[last_marker_end:].strip()
+        
+        # No marker found - return original text
+        return text.strip()
     
     def _flatten_dict(self, d: dict, parent_key: str = '', sep: str = '_') -> dict:
         """Flatten nested dictionary."""
