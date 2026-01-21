@@ -107,76 +107,33 @@ class DomylandExportService:
         Exports fields: id, address, title, valueString, valueText, extId, createdAt
         
         Field mapping:
-        - valueString: answers from dropdown/checkbox fields (e.g. "Стеклопакет ПВХ: поврежден")
-        - valueText: text from comment fields (e.g. "Окно 2 1Царапины... 2Отслоение...")
-        
-        Comment fields are identified by elementTitle containing keywords like:
-        - "комментарий", "описание", "укажите", "опишите"
+        - valueString: answers from orderElements (dropdown/checkbox values)
+        - valueText: customerSummary (contains detailed defect descriptions)
         """
         raw_data = await self.client.get_orders_with_invoices(
             building_id=building_id,
             created_at=created_at,
         )
         
-        # Patterns that indicate a free-text comment field (case-insensitive)
-        # Must be specific to avoid matching "Укажите помещение" etc.
-        comment_patterns = [
-            "оставьте свой комментарий",
-            "оставьте комментарий", 
-            "ваш комментарий",
-            "комментарий с описанием",
-            "описание дефекта",
-            "опишите дефект",
-            "примечание",
-        ]
-        
-        def is_comment_field(elem_title: str) -> bool:
-            """Check if element is a free-text comment field."""
-            if not elem_title:
-                return False
-            elem_lower = elem_title.lower()
-            return any(pattern in elem_lower for pattern in comment_patterns)
-        
-        # Log unique element titles for debugging (first 10 orders)
-        all_elem_titles = set()
-        for order in raw_data[:10]:
-            for elem in order.get("orderElements", []):
-                elem_title = elem.get("elementTitle")
-                if elem_title:
-                    all_elem_titles.add(elem_title)
-        logger.info(f"Sample elementTitles from API: {list(all_elem_titles)[:20]}")
-        
         # Transform data to extract only needed fields
         data = []
         for order in raw_data:
             order_elements = order.get("orderElements", [])
             
-            # Separate values into dropdown answers vs text comments
-            value_strings = []  # Answers from dropdowns/checkboxes
-            value_texts = []    # Text from comment fields
-            
+            # Collect all values from orderElements
+            value_strings = []
             for elem in order_elements:
                 val_title = elem.get("valueTitle")
-                elem_title = elem.get("elementTitle")
-                
-                if not val_title:
-                    continue
-                
-                val_str = str(val_title).strip()
-                if not val_str:
-                    continue
-                
-                # Check if this is a comment field based on element title
-                if is_comment_field(elem_title):
-                    # This is a free-text comment - goes to valueText
-                    value_texts.append(val_str)
-                else:
-                    # This is a dropdown/checkbox answer - goes to valueString
-                    value_strings.append(val_str)
+                if val_title:
+                    val_str = str(val_title).strip()
+                    if val_str:
+                        value_strings.append(val_str)
             
             # Remove duplicates while preserving order
             value_strings = list(dict.fromkeys(value_strings))
-            value_texts = list(dict.fromkeys(value_texts))
+            
+            # customerSummary contains the detailed defect text!
+            value_text = order.get("customerSummary") or ""
             
             # Build address
             address = order.get("placeAddress") or order.get("buildingTitle") or ""
@@ -195,7 +152,7 @@ class DomylandExportService:
                 "address": address,
                 "title": order.get("serviceTitle") or "",
                 "valueString": " | ".join(value_strings) if value_strings else "",
-                "valueText": " | ".join(value_texts) if value_texts else "",
+                "valueText": value_text,
                 "extId": order.get("extId"),
                 "createdAt": created_at_str,
             }
