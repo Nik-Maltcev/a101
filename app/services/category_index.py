@@ -56,8 +56,7 @@ class CategoryIndex:
     def load_categories(self) -> list[str]:
         """Load categories from the Excel file.
         
-        Reads the first column of the first sheet as category names.
-        Filters out section headers (lines starting with digits like "01.", "02.").
+        Reads the "Наименование" column (3rd column) as category names.
         
         Returns:
             List of category strings
@@ -85,19 +84,16 @@ class CategoryIndex:
                 raise CategoryIndexError("No active sheet found in categories file")
 
             categories = []
-            # Pattern to match section headers like "01.", "02.", etc.
-            section_pattern = re.compile(r'^\d+\.\s')
             
-            # Read first column, skip header row
-            for row in sheet.iter_rows(min_row=2, max_col=1, values_only=True):
-                cell_value = row[0]
-                if cell_value is not None:
-                    category = str(cell_value).strip()
-                    if category:
-                        # Skip section headers (start with digits like "01.", "02.")
-                        if section_pattern.match(category):
-                            continue
-                        categories.append(category)
+            # Read "Наименование" column (3rd column, index 2), skip header row
+            for row in sheet.iter_rows(min_row=2, values_only=True):
+                # Column C (index 2) is "Наименование"
+                if len(row) >= 3:
+                    cell_value = row[2]  # Наименование column
+                    if cell_value is not None:
+                        category = str(cell_value).strip()
+                        if category:
+                            categories.append(category)
             
             workbook.close()
             

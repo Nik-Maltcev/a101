@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     STATIC_DIR: Path = BASE_DIR / "static"
     
     # Categories reference file
-    CATEGORIES_FILE: Path = DATA_DIR / "categories_new.xlsx"
+    CATEGORIES_FILE: Path = DATA_DIR / "actual_categories.xlsx"
     
     # Redis configuration
     REDIS_URL: str = "redis://localhost:6379/0"
