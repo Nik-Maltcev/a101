@@ -238,3 +238,57 @@ class DomylandExportService:
         """Export payments to Excel."""
         data = await self.client.get_payments(date_time=date_time)
         return self._write_to_excel(data, output_path, "Payments")
+    
+    async def export_orders_raw(
+        self,
+        output_path: Path,
+        building_id: Optional[int] = None,
+        created_at: Optional[str] = None,
+    ) -> Path:
+        """Export orders with ALL fields (raw data for debugging)."""
+        raw_data = await self.client.get_orders_with_invoices(
+            building_id=building_id,
+            created_at=created_at,
+        )
+        return self._write_to_excel(raw_data, output_path, "Orders_Raw")
+    
+    async def export_order_comments(
+        self,
+        output_path: Path,
+        order_ids: list[int],
+    ) -> Path:
+        """Export comments for specific orders."""
+        all_comments = []
+        for order_id in order_ids[:50]:  # Limit to 50 orders
+            comments = await self.client.get_order_comments(order_id)
+            for comment in comments:
+                comment["orderId"] = order_id
+                all_comments.append(comment)
+        return self._write_to_excel(all_comments, output_path, "Order_Comments")
+    
+    async def export_acceptance_results(
+        self,
+        output_path: Path,
+        building_id: Optional[int] = None,
+    ) -> Path:
+        """Export acceptance results (приёмка помещений)."""
+        data = await self.client.get_acceptance_results(building_id=building_id)
+        return self._write_to_excel(data, output_path, "Acceptance_Results")
+    
+    async def export_acceptance_defects(
+        self,
+        output_path: Path,
+        building_id: Optional[int] = None,
+    ) -> Path:
+        """Export acceptance defects."""
+        data = await self.client.get_acceptance_defects(building_id=building_id)
+        return self._write_to_excel(data, output_path, "Acceptance_Defects")
+    
+    async def export_columns_list(self, output_path: Path) -> Path:
+        """Export available columns list for orders."""
+        data = await self.client.get_orders_export_columns()
+        if isinstance(data, list):
+            return self._write_to_excel(data, output_path, "Export_Columns")
+        elif isinstance(data, dict):
+            return self._write_to_excel([data], output_path, "Export_Columns")
+        return self._write_to_excel([], output_path, "Export_Columns")

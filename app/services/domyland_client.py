@@ -263,6 +263,46 @@ class DomylandClient:
             params["placeId"] = place_id
         return await self.get_all_pages("meteringData", params)
     
+    async def get_order_comments(self, order_id: int) -> list[dict]:
+        """Get comments for a specific order."""
+        try:
+            data = await self._request("GET", f"order-comments", params={"orderId": order_id})
+            return data.get("items", []) if isinstance(data, dict) else data
+        except Exception as e:
+            logger.warning(f"Failed to get comments for order {order_id}: {e}")
+            return []
+    
+    async def get_orders_export_columns(self) -> list[dict]:
+        """Get list of available columns for orders export."""
+        try:
+            return await self._request("GET", "orders/export-columns-list")
+        except Exception as e:
+            logger.warning(f"Failed to get export columns: {e}")
+            return []
+    
+    async def get_acceptance_results(
+        self,
+        building_id: Optional[int] = None,
+        created_at: Optional[str] = None,
+    ) -> list[dict]:
+        """Get acceptance results (приёмка помещений)."""
+        params = {}
+        if building_id:
+            params["buildingId"] = building_id
+        if created_at:
+            params["createdAt"] = created_at
+        return await self.get_all_pages("acceptance/results", params)
+    
+    async def get_acceptance_defects(
+        self,
+        building_id: Optional[int] = None,
+    ) -> list[dict]:
+        """Get acceptance defects."""
+        params = {}
+        if building_id:
+            params["buildingId"] = building_id
+        return await self.get_all_pages("acceptance/form/defects", params)
+    
     async def __aenter__(self):
         return self
     

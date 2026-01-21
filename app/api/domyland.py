@@ -105,8 +105,12 @@ async def _check_permissions(client: DomylandClient) -> list[dict]:
         {"id": "buildings", "name": "Объекты/здания", "endpoint": "buildings"},
         {"id": "places", "name": "Помещения", "endpoint": "places"},
         {"id": "orders", "name": "Заявки", "endpoint": "orders"},
+        {"id": "orders_raw", "name": "Заявки (все поля)", "endpoint": "orders"},
         {"id": "customers", "name": "Клиенты", "endpoint": "customers"},
         {"id": "payments", "name": "Платежи", "endpoint": "payments"},
+        {"id": "acceptance_results", "name": "Приёмка - результаты", "endpoint": "acceptance/results"},
+        {"id": "acceptance_defects", "name": "Приёмка - дефекты", "endpoint": "acceptance/form/defects"},
+        {"id": "export_columns", "name": "Список колонок экспорта", "endpoint": "orders/export-columns-list"},
     ]
     
     available = []
@@ -169,6 +173,24 @@ async def export_data(request: ExportRequest) -> ExportResponse:
             )
         elif request.export_type == "payments":
             await export_service.export_payments(output_path, request.created_at)
+        elif request.export_type == "orders_raw":
+            await export_service.export_orders_raw(
+                output_path,
+                building_id=request.building_id,
+                created_at=request.created_at,
+            )
+        elif request.export_type == "acceptance_results":
+            await export_service.export_acceptance_results(
+                output_path,
+                building_id=request.building_id,
+            )
+        elif request.export_type == "acceptance_defects":
+            await export_service.export_acceptance_defects(
+                output_path,
+                building_id=request.building_id,
+            )
+        elif request.export_type == "export_columns":
+            await export_service.export_columns_list(output_path)
         else:
             return ExportResponse(
                 success=False,
