@@ -1,6 +1,7 @@
 """Service for exporting Domyland data to Excel."""
 
 import logging
+import re
 from pathlib import Path
 from typing import Optional
 from datetime import datetime
@@ -10,6 +11,9 @@ from openpyxl import Workbook
 from app.services.domyland_client import DomylandClient
 
 logger = logging.getLogger(__name__)
+
+# Regex to find image URLs from domyland uploads
+PHOTO_URL_PATTERN = re.compile(r'https?://uploads\.domyland\.com/[a-zA-Z0-9_-]+\.(jpeg|jpg|png|gif)', re.IGNORECASE)
 
 
 class DomylandExportService:
@@ -133,7 +137,21 @@ class DomylandExportService:
             value_strings = list(dict.fromkeys(value_strings))
             
             # customerSummary contains the detailed defect text!
-            value_text = order.get("customerSummary") or ""
+            raw_value_text = order.get("customerSummary") or ""
+            
+            # Extract photo URLs and remove them from valueText
+            photo_urls = PHOTO_URL_PATTERN.findall(raw_value_text)
+            # findall returns tuples with extension, we need full URLs
+            photo_urls = PHOTO_URL_PATTERN.findall(raw_value_text)
+            full_photo_urls = [m.group(0) for m in PHOTO_URL_PATTERN.finditer(raw_value_text)]
+            
+            # Remove photo URLs from text
+            value_text = PHOTO_URL_PATTERN.sub('', raw_value_text).strip()
+            # Clean up extra spaces/newlines left after URL removal
+            value_text = re.sub(r'\s+', ' ', value_text).strip()
+            
+            # Join photo URLs with newline for the Фото column
+            photos = '\n'.join(full_photo_urls) if full_photo_urls else ""
             
             # Build address
             address = order.get("placeAddress") or order.get("buildingTitle") or ""
