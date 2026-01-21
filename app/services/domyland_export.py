@@ -130,15 +130,25 @@ class DomylandExportService:
         
         logger.info(f"Got {len(raw_data)} orders from API")
         
+        # Log actual serviceIds in data BEFORE filtering
+        if raw_data:
+            actual_service_ids = set(order.get("serviceId") for order in raw_data)
+            logger.info(f"Unique serviceIds in ALL orders: {len(actual_service_ids)} different IDs")
+            logger.info(f"First 20 actual serviceIds: {list(actual_service_ids)[:20]}")
+        
         # Filter by service_ids if provided
         if service_ids:
             before_filter = len(raw_data)
-            # Log actual serviceIds in data to debug filtering
-            actual_service_ids = set(order.get("serviceId") for order in raw_data[:100])
-            logger.info(f"Sample of actual serviceIds in data (first 100 orders): {actual_service_ids}")
-            logger.info(f"Requested service_ids: {service_ids[:10]}... (total {len(service_ids)})")
+            service_ids_set = set(service_ids)
+            logger.info(f"Requested service_ids: {list(service_ids_set)[:10]}... (total {len(service_ids_set)})")
             
-            raw_data = [order for order in raw_data if order.get("serviceId") in service_ids]
+            # Check intersection
+            if raw_data:
+                actual_service_ids = set(order.get("serviceId") for order in raw_data)
+                intersection = actual_service_ids & service_ids_set
+                logger.info(f"Intersection (matching IDs): {intersection}")
+            
+            raw_data = [order for order in raw_data if order.get("serviceId") in service_ids_set]
             logger.info(f"Filtered by service_ids: {before_filter} -> {len(raw_data)} orders")
         
         # Log first order structure for debugging
