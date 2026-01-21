@@ -109,6 +109,7 @@ class DomylandExportService:
         output_path: Path,
         building_id: Optional[int] = None,
         created_at: Optional[str] = None,
+        service_ids: Optional[list[int]] = None,
     ) -> Path:
         """Export orders to Excel.
         
@@ -117,11 +118,19 @@ class DomylandExportService:
         Field mapping:
         - valueString: answers from orderElements (dropdown/checkbox values)
         - valueText: customerSummary (contains detailed defect descriptions)
+        
+        Args:
+            service_ids: Filter by service IDs (multiple). If provided, only orders
+                        with matching serviceId will be exported.
         """
         raw_data = await self.client.get_orders_with_invoices(
             building_id=building_id,
             created_at=created_at,
         )
+        
+        # Filter by service_ids if provided
+        if service_ids:
+            raw_data = [order for order in raw_data if order.get("serviceId") in service_ids]
         
         # Transform data to extract only needed fields
         data = []

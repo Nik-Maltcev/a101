@@ -44,6 +44,7 @@ class ExportRequest(BaseModel):
     building_id: Optional[int] = None
     created_at: Optional[str] = None  # DD.MM.YYYY-DD.MM.YYYY
     updated_at: Optional[str] = None
+    service_ids: Optional[list[int]] = None  # Filter by service IDs (multiple)
 
 
 class ExportResponse(BaseModel):
@@ -130,6 +131,34 @@ async def _check_permissions(client: DomylandClient) -> list[dict]:
     return available
 
 
+@router.get("/services/{session_id}")
+async def get_services(session_id: str):
+    """Get list of available services for filtering."""
+    session = _tokens.get(session_id)
+    if not session:
+        raise HTTPException(status_code=401, detail="Сессия не найдена")
+    
+    client = DomylandClient()
+    client.set_token(session["token"])
+    
+    try:
+        services = await client.get_services()
+        # Return simplified list with id and title
+        return {
+            "services": [
+                {"id": s.get("id"), "title": s.get("title") or s.get("internalTitle") or f"Service {s.get('id')}"}
+                for s in services
+            ]
+        }
+    except DomylandAuthError:
+        _tokens.pop(session_id, None)
+        raise HTTPException(status_code=401, detail="Сессия истекла")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        await client.close()
+
+
 @router.post("/export", response_model=ExportResponse)
 async def export_data(request: ExportRequest) -> ExportResponse:
     """
@@ -171,6 +200,7 @@ async def export_data(request: ExportRequest) -> ExportResponse:
                 output_path,
                 building_id=request.building_id,
                 created_at=request.created_at,
+                service_ids=request.service_ids,
             )
         elif request.export_type == "payments":
             await export_service.export_payments(output_path, request.created_at)

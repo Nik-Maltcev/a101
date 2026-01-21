@@ -612,6 +612,15 @@
                         </select>
                     </div>
                     
+                    <div class="form-group" id="servicesGroup" style="display: none;">
+                        <label>Фильтр по услугам (множественный выбор)</label>
+                        <div id="servicesLoading" class="domyland-status info">⏳ Загрузка списка услуг...</div>
+                        <div id="servicesList" style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px; padding: 10px; display: none;">
+                            <!-- Services checkboxes will be loaded here -->
+                        </div>
+                        <small style="color: #666;">Оставьте пустым для экспорта всех услуг</small>
+                    </div>
+                    
                     <div class="form-group" id="buildingIdGroup">
                         <label>ID здания (опционально)</label>
                         <input type="number" class="form-input" id="buildingId" placeholder="Оставьте пустым для всех">
@@ -970,6 +979,7 @@
         // ========== DOMYLAND ==========
         let domylandSessionId = null;
         let lastExportUrl = null;
+        let servicesLoaded = false;
 
         const domylandAuthBtn = document.getElementById('domylandAuthBtn');
         const domylandExportBtn = document.getElementById('domylandExportBtn');
@@ -978,6 +988,52 @@
         const exportResult = document.getElementById('exportResult');
         const domylandAuthForm = document.getElementById('domylandAuthForm');
         const domylandExportForm = document.getElementById('domylandExportForm');
+        
+        // Load services list for filtering
+        async function loadServices() {
+            if (!domylandSessionId || servicesLoaded) return;
+            
+            const servicesLoading = document.getElementById('servicesLoading');
+            const servicesList = document.getElementById('servicesList');
+            
+            try {
+                const response = await fetch(`/domyland/services/${domylandSessionId}`);
+                const data = await response.json();
+                
+                if (data.services && data.services.length > 0) {
+                    servicesList.innerHTML = '';
+                    data.services.forEach(service => {
+                        const div = document.createElement('div');
+                        div.style.marginBottom = '5px';
+                        div.innerHTML = `
+                            <label style="display: flex; align-items: center; cursor: pointer;">
+                                <input type="checkbox" class="service-checkbox" value="${service.id}" style="margin-right: 8px;">
+                                <span>${service.title} (ID: ${service.id})</span>
+                            </label>
+                        `;
+                        servicesList.appendChild(div);
+                    });
+                    servicesLoading.style.display = 'none';
+                    servicesList.style.display = 'block';
+                    servicesLoaded = true;
+                } else {
+                    servicesLoading.textContent = 'Услуги не найдены';
+                }
+            } catch (error) {
+                servicesLoading.textContent = '❌ Ошибка загрузки услуг';
+                console.error('Error loading services:', error);
+            }
+        }
+        
+        // Show/hide services filter based on export type
+        document.getElementById('exportType').addEventListener('change', function() {
+            const servicesGroup = document.getElementById('servicesGroup');
+            if (this.value === 'orders') {
+                servicesGroup.style.display = 'block';
+            } else {
+                servicesGroup.style.display = 'none';
+            }
+        });
 
         domylandAuthBtn.addEventListener('click', async () => {
             const email = document.getElementById('domylandEmail').value;
@@ -1023,6 +1079,9 @@
                         
                         // Trigger change to update form fields
                         exportTypeSelect.dispatchEvent(new Event('change'));
+                        
+                        // Load services list for filtering
+                        loadServices();
                     } else {
                         authStatus.className = 'domyland-status error';
                         authStatus.textContent = '❌ Нет доступных типов экспорта для вашего аккаунта';
@@ -1058,6 +1117,12 @@
             const exportType = document.getElementById('exportType').value;
             const buildingId = document.getElementById('buildingId').value;
             const dateRange = document.getElementById('dateRange').value;
+            
+            // Get selected service IDs
+            const selectedServices = [];
+            document.querySelectorAll('.service-checkbox:checked').forEach(cb => {
+                selectedServices.push(parseInt(cb.value));
+            });
 
             domylandExportBtn.disabled = true;
             exportStatus.className = 'domyland-status info';
@@ -1073,6 +1138,9 @@
                 if (dateRange) {
                     if (exportType === 'orders') body.created_at = dateRange;
                     else body.updated_at = dateRange;
+                }
+                if (selectedServices.length > 0 && exportType === 'orders') {
+                    body.service_ids = selectedServices;
                 }
 
                 const response = await fetch('/domyland/export', {

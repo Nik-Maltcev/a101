@@ -263,6 +263,10 @@ class DomylandClient:
             params["placeId"] = place_id
         return await self.get_all_pages("meteringData", params)
     
+    async def get_services(self) -> list[dict]:
+        """Get list of available services."""
+        return await self.get_all_pages("services")
+    
     async def get_order_comments(self, order_id: int) -> list[dict]:
         """Get comments for a specific order."""
         try:
