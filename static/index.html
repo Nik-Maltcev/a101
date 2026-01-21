@@ -618,6 +618,7 @@
                         <div id="servicesList" style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px; padding: 10px; display: none;">
                             <!-- Services checkboxes will be loaded here -->
                         </div>
+                        <button type="button" id="loadMoreServicesBtn" class="btn" style="display: none; margin-top: 5px; font-size: 12px;">📥 Загрузить ещё</button>
                         <small style="color: #666;">Оставьте пустым для экспорта всех услуг</small>
                     </div>
                     
@@ -990,18 +991,32 @@
         const domylandExportForm = document.getElementById('domylandExportForm');
         
         // Load services list for filtering
-        async function loadServices() {
-            if (!domylandSessionId || servicesLoaded) return;
+        let servicesNextRow = 0;
+        
+        async function loadServices(append = false) {
+            if (!domylandSessionId) return;
             
             const servicesLoading = document.getElementById('servicesLoading');
             const servicesList = document.getElementById('servicesList');
+            const loadMoreBtn = document.getElementById('loadMoreServicesBtn');
+            
+            if (!append) {
+                servicesLoading.style.display = 'block';
+                servicesLoading.textContent = '⏳ Загрузка списка услуг...';
+            } else {
+                loadMoreBtn.disabled = true;
+                loadMoreBtn.textContent = '⏳ Загрузка...';
+            }
             
             try {
-                const response = await fetch(`/domyland/services/${domylandSessionId}`);
+                const response = await fetch(`/domyland/services/${domylandSessionId}?from_row=${servicesNextRow}`);
                 const data = await response.json();
                 
                 if (data.services && data.services.length > 0) {
-                    servicesList.innerHTML = '';
+                    if (!append) {
+                        servicesList.innerHTML = '';
+                    }
+                    
                     data.services.forEach(service => {
                         const div = document.createElement('div');
                         div.style.marginBottom = '5px';
@@ -1013,17 +1028,35 @@
                         `;
                         servicesList.appendChild(div);
                     });
+                    
                     servicesLoading.style.display = 'none';
                     servicesList.style.display = 'block';
                     servicesLoaded = true;
-                } else {
+                    
+                    // Update next row and show/hide load more button
+                    servicesNextRow = data.next_row;
+                    if (data.has_more) {
+                        loadMoreBtn.style.display = 'inline-block';
+                        loadMoreBtn.disabled = false;
+                        loadMoreBtn.textContent = '📥 Загрузить ещё';
+                    } else {
+                        loadMoreBtn.style.display = 'none';
+                    }
+                } else if (!append) {
                     servicesLoading.textContent = 'Услуги не найдены';
                 }
             } catch (error) {
-                servicesLoading.textContent = '❌ Ошибка загрузки услуг';
+                if (!append) {
+                    servicesLoading.textContent = '❌ Ошибка загрузки услуг';
+                }
                 console.error('Error loading services:', error);
             }
         }
+        
+        // Load more services button handler
+        document.getElementById('loadMoreServicesBtn').addEventListener('click', () => {
+            loadServices(true);
+        });
         
         // Show/hide services filter based on export type
         document.getElementById('exportType').addEventListener('change', function() {

@@ -132,8 +132,8 @@ async def _check_permissions(client: DomylandClient) -> list[dict]:
 
 
 @router.get("/services/{session_id}")
-async def get_services(session_id: str):
-    """Get list of available services for filtering."""
+async def get_services(session_id: str, from_row: int = 0):
+    """Get list of available services for filtering (paginated)."""
     session = _tokens.get(session_id)
     if not session:
         raise HTTPException(status_code=401, detail="Сессия не найдена")
@@ -142,13 +142,15 @@ async def get_services(session_id: str):
     client.set_token(session["token"])
     
     try:
-        services = await client.get_services()
+        services, next_row = await client.get_services(from_row)
         # Return simplified list with id and title
         return {
             "services": [
                 {"id": s.get("id"), "title": s.get("title") or s.get("internalTitle") or f"Service {s.get('id')}"}
                 for s in services
-            ]
+            ],
+            "next_row": next_row,
+            "has_more": next_row != -1
         }
     except DomylandAuthError:
         _tokens.pop(session_id, None)

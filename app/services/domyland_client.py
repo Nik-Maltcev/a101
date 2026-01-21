@@ -263,14 +263,20 @@ class DomylandClient:
             params["placeId"] = place_id
         return await self.get_all_pages("meteringData", params)
     
-    async def get_services(self) -> list[dict]:
-        """Get list of available services (first page only for speed)."""
+    async def get_services(self, from_row: int = 0) -> tuple[list[dict], int]:
+        """Get list of available services (one page).
+        
+        Returns:
+            Tuple of (services list, next_row). next_row=-1 means no more pages.
+        """
         try:
-            data = await self._request("GET", "services", params={"fromRow": 0})
-            return data.get("items", [])
+            data = await self._request("GET", "services", params={"fromRow": from_row})
+            items = data.get("items", [])
+            next_row = data.get("nextRow", -1)
+            return items, next_row
         except Exception as e:
             logger.warning(f"Failed to get services: {e}")
-            return []
+            return [], -1
     
     async def get_order_comments(self, order_id: int) -> list[dict]:
         """Get comments for a specific order."""
