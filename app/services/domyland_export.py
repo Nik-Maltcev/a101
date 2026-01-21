@@ -268,7 +268,7 @@ class DomylandExportService:
         output_path: Path,
         building_id: Optional[int] = None,
         created_at: Optional[str] = None,
-        limit: int = 100,  # Limit for debugging
+        limit: int = 200,  # Limit for debugging
     ) -> Path:
         """Export orders with ALL fields (raw data for debugging). Limited to first N records."""
         # Get just first page for debugging
