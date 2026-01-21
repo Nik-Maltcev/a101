@@ -133,8 +133,13 @@ class DomylandExportService:
         # Filter by service_ids if provided
         if service_ids:
             before_filter = len(raw_data)
+            # Log actual serviceIds in data to debug filtering
+            actual_service_ids = set(order.get("serviceId") for order in raw_data[:100])
+            logger.info(f"Sample of actual serviceIds in data (first 100 orders): {actual_service_ids}")
+            logger.info(f"Requested service_ids: {service_ids[:10]}... (total {len(service_ids)})")
+            
             raw_data = [order for order in raw_data if order.get("serviceId") in service_ids]
-            logger.info(f"Filtered by service_ids {service_ids}: {before_filter} -> {len(raw_data)} orders")
+            logger.info(f"Filtered by service_ids: {before_filter} -> {len(raw_data)} orders")
         
         # Log first order structure for debugging
         if raw_data:
