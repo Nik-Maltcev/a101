@@ -101,6 +101,7 @@ async def authenticate(request: AuthRequest) -> AuthResponse:
 
 async def _check_permissions(client: DomylandClient) -> list[dict]:
     """Check which API endpoints are accessible for the authenticated user."""
+    # Only check main endpoints, skip slow/experimental ones
     all_types = [
         {"id": "buildings", "name": "Объекты/здания", "endpoint": "buildings"},
         {"id": "places", "name": "Помещения", "endpoint": "places"},
@@ -108,15 +109,12 @@ async def _check_permissions(client: DomylandClient) -> list[dict]:
         {"id": "orders_raw", "name": "Заявки (все поля)", "endpoint": "orders"},
         {"id": "customers", "name": "Клиенты", "endpoint": "customers"},
         {"id": "payments", "name": "Платежи", "endpoint": "payments"},
-        {"id": "acceptance_results", "name": "Приёмка - результаты", "endpoint": "acceptance/results"},
-        {"id": "acceptance_defects", "name": "Приёмка - дефекты", "endpoint": "acceptance/form/defects"},
-        {"id": "export_columns", "name": "Список колонок экспорта", "endpoint": "orders/export-columns-list"},
     ]
     
     available = []
     for export_type in all_types:
         try:
-            # Try to fetch first page to check access
+            # Try to fetch first page to check access (with short timeout)
             await client._request("GET", export_type["endpoint"], params={"fromRow": 0})
             available.append({
                 "id": export_type["id"],
@@ -124,6 +122,9 @@ async def _check_permissions(client: DomylandClient) -> list[dict]:
             })
         except DomylandClientError:
             # No access to this endpoint
+            pass
+        except Exception:
+            # Timeout or other error - skip
             pass
     
     return available
