@@ -137,6 +137,15 @@ class DomylandExportService:
             elem_lower = elem_title.lower()
             return any(pattern in elem_lower for pattern in comment_patterns)
         
+        # Log unique element titles for debugging (first 10 orders)
+        all_elem_titles = set()
+        for order in raw_data[:10]:
+            for elem in order.get("orderElements", []):
+                elem_title = elem.get("elementTitle")
+                if elem_title:
+                    all_elem_titles.add(elem_title)
+        logger.info(f"Sample elementTitles from API: {list(all_elem_titles)[:20]}")
+        
         # Transform data to extract only needed fields
         data = []
         for order in raw_data:
