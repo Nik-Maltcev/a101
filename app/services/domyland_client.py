@@ -141,7 +141,7 @@ class DomylandClient:
         self, 
         endpoint: str, 
         params: Optional[dict] = None,
-        max_pages: int = 100,
+        max_pages: int = 1000,  # Increased for large datasets
     ) -> list[dict]:
         """
         Fetch all pages of data from paginated endpoint.
