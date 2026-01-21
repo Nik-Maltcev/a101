@@ -118,10 +118,16 @@ class DomylandExportService:
             created_at=created_at,
         )
         
-        # Keywords that indicate a text comment field (case-insensitive)
-        comment_keywords = [
-            "комментарий", "описание", "опишите", "укажите", 
-            "напишите", "введите", "текст", "примечание"
+        # Patterns that indicate a free-text comment field (case-insensitive)
+        # Must be specific to avoid matching "Укажите помещение" etc.
+        comment_patterns = [
+            "оставьте свой комментарий",
+            "оставьте комментарий", 
+            "ваш комментарий",
+            "комментарий с описанием",
+            "описание дефекта",
+            "опишите дефект",
+            "примечание",
         ]
         
         def is_comment_field(elem_title: str) -> bool:
@@ -129,7 +135,7 @@ class DomylandExportService:
             if not elem_title:
                 return False
             elem_lower = elem_title.lower()
-            return any(kw in elem_lower for kw in comment_keywords)
+            return any(pattern in elem_lower for pattern in comment_patterns)
         
         # Transform data to extract only needed fields
         data = []
