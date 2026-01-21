@@ -167,17 +167,23 @@ class DomylandExportService:
             
             row = {
                 "id": order.get("id"),
+                "ФИО": order.get("customerFullName") or order.get("customerShortName") or "",
+                "Телефон": order.get("customerPhoneNumber") or "",
                 "address": address,
+                "placeNumber": order.get("placeNumber") or "",
+                "placeId": order.get("placeId") or "",
+                "placeExtId": order.get("placeExtId") or "",
                 "title": order.get("serviceTitle") or "",
                 "valueString": " | ".join(value_strings) if value_strings else "",
                 "valueText": value_text,
+                "Фото": photos,
                 "extId": order.get("extId"),
                 "createdAt": created_at_str,
             }
             data.append(row)
         
         return self._write_to_excel_ordered(data, output_path, "Orders", 
-            ["id", "address", "title", "valueString", "valueText", "extId", "createdAt"])
+            ["id", "ФИО", "Телефон", "address", "placeNumber", "placeId", "placeExtId", "title", "valueString", "valueText", "Фото", "extId", "createdAt"])
     
     def _write_to_excel_ordered(
         self, 
