@@ -244,13 +244,20 @@ class DomylandExportService:
         output_path: Path,
         building_id: Optional[int] = None,
         created_at: Optional[str] = None,
+        limit: int = 100,  # Limit for debugging
     ) -> Path:
-        """Export orders with ALL fields (raw data for debugging)."""
-        raw_data = await self.client.get_orders_with_invoices(
-            building_id=building_id,
-            created_at=created_at,
-        )
-        return self._write_to_excel(raw_data, output_path, "Orders_Raw")
+        """Export orders with ALL fields (raw data for debugging). Limited to first N records."""
+        # Get just first page for debugging
+        params = {"fromRow": 0}
+        if building_id:
+            params["buildingId"] = building_id
+        if created_at:
+            params["createdAt"] = created_at
+        
+        data = await self.client._request("GET", "orders", params=params)
+        items = data.get("items", [])[:limit]
+        
+        return self._write_to_excel(items, output_path, "Orders_Raw")
     
     async def export_order_comments(
         self,
