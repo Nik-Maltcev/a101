@@ -4,7 +4,7 @@ import logging
 import re
 from pathlib import Path
 from typing import Optional
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 
 from openpyxl import Workbook
 
@@ -14,6 +14,9 @@ logger = logging.getLogger(__name__)
 
 # Regex to find image URLs from domyland uploads
 PHOTO_URL_PATTERN = re.compile(r'https?://uploads\.domyland\.com/[a-zA-Z0-9_-]+\.(jpeg|jpg|png|gif)', re.IGNORECASE)
+
+# Moscow timezone (UTC+3)
+MOSCOW_TZ = timezone(timedelta(hours=3))
 
 
 class DomylandExportService:
@@ -76,7 +79,8 @@ class DomylandExportService:
                 # Convert timestamps to readable dates
                 if isinstance(value, int) and value > 1000000000 and value < 2000000000:
                     try:
-                        value = datetime.fromtimestamp(value).strftime("%d.%m.%Y %H:%M")
+                        # Convert to Moscow time
+                        value = datetime.fromtimestamp(value, tz=MOSCOW_TZ).strftime("%d.%m.%Y %H:%M")
                     except:
                         pass
                 ws.cell(row=row_idx, column=col_idx, value=value)
@@ -161,7 +165,8 @@ class DomylandExportService:
             created_at_str = ""
             if created_at_ts and isinstance(created_at_ts, int):
                 try:
-                    created_at_str = datetime.fromtimestamp(created_at_ts).strftime("%d.%m.%Y %H:%M")
+                    # Convert to Moscow time
+                    created_at_str = datetime.fromtimestamp(created_at_ts, tz=MOSCOW_TZ).strftime("%d.%m.%Y %H:%M")
                 except:
                     created_at_str = str(created_at_ts)
             
