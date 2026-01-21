@@ -128,9 +128,21 @@ class DomylandExportService:
             created_at=created_at,
         )
         
+        logger.info(f"Got {len(raw_data)} orders from API")
+        
         # Filter by service_ids if provided
         if service_ids:
+            before_filter = len(raw_data)
             raw_data = [order for order in raw_data if order.get("serviceId") in service_ids]
+            logger.info(f"Filtered by service_ids {service_ids}: {before_filter} -> {len(raw_data)} orders")
+        
+        # Log first order structure for debugging
+        if raw_data:
+            first_order = raw_data[0]
+            logger.info(f"First order keys: {list(first_order.keys())}")
+            logger.info(f"First order id: {first_order.get('id')}")
+            logger.info(f"First order customerSummary: {first_order.get('customerSummary', '')[:200] if first_order.get('customerSummary') else 'EMPTY'}")
+            logger.info(f"First order orderElements: {first_order.get('orderElements', [])}")
         
         # Transform data to extract only needed fields
         data = []
