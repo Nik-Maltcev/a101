@@ -110,6 +110,7 @@ class DomylandExportService:
         building_id: Optional[int] = None,
         created_at: Optional[str] = None,
         service_ids: Optional[list[int]] = None,
+        fetch_full_details: bool = True,
     ) -> Path:
         """Export orders to Excel.
         
@@ -122,6 +123,8 @@ class DomylandExportService:
         Args:
             service_ids: Filter by service IDs (multiple). If provided, only orders
                         with matching serviceId will be exported.
+            fetch_full_details: If True, fetch full details for each order to get
+                               complete customerSummary (not truncated). Default True.
         """
         raw_data = await self.client.get_orders_with_invoices(
             building_id=building_id,
@@ -151,12 +154,49 @@ class DomylandExportService:
             raw_data = [order for order in raw_data if order.get("serviceId") in service_ids_set]
             logger.info(f"Filtered by service_ids: {before_filter} -> {len(raw_data)} orders")
         
+        # Fetch full details for each order if requested
+        if fetch_full_details and raw_data:
+            logger.info(f"Fetching full details for {len(raw_data)} orders...")
+            import asyncio
+            
+            async def fetch_order_details(order: dict) -> dict:
+                """Fetch full details and merge with order."""
+                order_id = order.get("id")
+                if not order_id:
+                    return order
+                
+                details = await self.client.get_order_details(order_id)
+                if details:
+                    # Merge details into order, preferring details for customerSummary
+                    merged = {**order, **details}
+                    # Log if customerSummary was extended
+                    old_len = len(order.get("customerSummary") or "")
+                    new_len = len(details.get("customerSummary") or "")
+                    if new_len > old_len:
+                        logger.debug(f"Order {order_id}: customerSummary extended {old_len} -> {new_len} chars")
+                    return merged
+                return order
+            
+            # Process in batches to avoid overwhelming the API
+            batch_size = 10
+            enriched_data = []
+            for i in range(0, len(raw_data), batch_size):
+                batch = raw_data[i:i + batch_size]
+                tasks = [fetch_order_details(order) for order in batch]
+                results = await asyncio.gather(*tasks)
+                enriched_data.extend(results)
+                logger.info(f"Fetched details for orders {i+1}-{min(i+batch_size, len(raw_data))}/{len(raw_data)}")
+            
+            raw_data = enriched_data
+        
         # Log first order structure for debugging
         if raw_data:
             first_order = raw_data[0]
             logger.info(f"First order keys: {list(first_order.keys())}")
             logger.info(f"First order id: {first_order.get('id')}")
-            logger.info(f"First order customerSummary: {first_order.get('customerSummary', '')[:200] if first_order.get('customerSummary') else 'EMPTY'}")
+            customer_summary = first_order.get('customerSummary', '')
+            logger.info(f"First order customerSummary length: {len(customer_summary) if customer_summary else 0}")
+            logger.info(f"First order customerSummary: {customer_summary[:500] if customer_summary else 'EMPTY'}...")
             logger.info(f"First order orderElements: {first_order.get('orderElements', [])}")
         
         # Transform data to extract only needed fields

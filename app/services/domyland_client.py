@@ -287,6 +287,26 @@ class DomylandClient:
             logger.warning(f"Failed to get comments for order {order_id}: {e}")
             return []
     
+    async def get_order_details(self, order_id: int) -> dict:
+        """
+        Get full details for a specific order by ID.
+        
+        This returns complete data including full customerSummary text
+        (which may be truncated in list endpoints).
+        
+        Args:
+            order_id: Order ID
+            
+        Returns:
+            Full order data dict
+        """
+        try:
+            data = await self._request("GET", f"orders/{order_id}/view")
+            return data
+        except Exception as e:
+            logger.warning(f"Failed to get order details for {order_id}: {e}")
+            return {}
+    
     async def get_orders_export_columns(self) -> list[dict]:
         """Get list of available columns for orders export."""
         try:
