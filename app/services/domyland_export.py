@@ -171,13 +171,25 @@ class DomylandExportService:
                 
                 details = await self.client.get_order_details(order_id)
                 if details:
+                    # Log what we got from list vs details endpoint
+                    old_summary = order.get("customerSummary") or ""
+                    new_summary = details.get("customerSummary") or ""
+                    old_len = len(old_summary)
+                    new_len = len(new_summary)
+                    
+                    # Always log for debugging
+                    logger.info(f"Order {order_id}: LIST customerSummary ({old_len} chars): {old_summary[:200]}...")
+                    logger.info(f"Order {order_id}: DETAILS customerSummary ({new_len} chars): {new_summary[:200]}...")
+                    
+                    if new_len > old_len:
+                        logger.info(f"Order {order_id}: customerSummary EXTENDED {old_len} -> {new_len} chars")
+                    elif new_len < old_len:
+                        logger.warning(f"Order {order_id}: customerSummary SHORTER in details! {old_len} -> {new_len}")
+                    elif new_len == old_len and old_len > 0:
+                        logger.info(f"Order {order_id}: customerSummary SAME length ({old_len} chars)")
+                    
                     # Merge details into order, preferring details for customerSummary
                     merged = {**order, **details}
-                    # Log if customerSummary was extended
-                    old_len = len(order.get("customerSummary") or "")
-                    new_len = len(details.get("customerSummary") or "")
-                    if new_len > old_len:
-                        logger.debug(f"Order {order_id}: customerSummary extended {old_len} -> {new_len} chars")
                     return merged
                 return order
             

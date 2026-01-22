@@ -302,6 +302,11 @@ class DomylandClient:
         """
         try:
             data = await self._request("GET", f"orders/{order_id}/view")
+            # Log raw response for debugging
+            customer_summary = data.get("customerSummary", "")
+            logger.info(f"API /orders/{order_id}/view - customerSummary length: {len(customer_summary)}")
+            if len(customer_summary) > 100:
+                logger.info(f"API /orders/{order_id}/view - customerSummary preview: {customer_summary[:300]}...")
             return data
         except Exception as e:
             logger.warning(f"Failed to get order details for {order_id}: {e}")
