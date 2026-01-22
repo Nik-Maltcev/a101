@@ -223,6 +223,12 @@ class DomylandExportService:
             # customerSummary contains the detailed defect text!
             raw_value_text = order.get("customerSummary") or ""
             
+            # Log full length for debugging truncation issues
+            order_id = order.get("id")
+            if len(raw_value_text) > 500:
+                logger.info(f"Order {order_id}: customerSummary length = {len(raw_value_text)} chars")
+                logger.info(f"Order {order_id}: customerSummary FULL TEXT: {raw_value_text}")
+            
             # Extract photo URLs and remove them from valueText
             # Use finditer to get full match objects
             full_photo_urls = [m.group(0) for m in PHOTO_URL_PATTERN.finditer(raw_value_text)]
