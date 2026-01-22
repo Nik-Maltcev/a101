@@ -13,7 +13,11 @@ from app.services.domyland_client import DomylandClient
 logger = logging.getLogger(__name__)
 
 # Regex to find image URLs from domyland uploads
-PHOTO_URL_PATTERN = re.compile(r'https?://uploads\.domyland\.com/[a-zA-Z0-9_-]+\.(jpeg|jpg|png|gif)', re.IGNORECASE)
+# Matches both full URLs with extension and truncated URLs without extension
+PHOTO_URL_PATTERN = re.compile(
+    r'https?://uploads\.domyland\.com/[a-zA-Z0-9_-]+(?:\.(jpeg|jpg|png|gif))?',
+    re.IGNORECASE
+)
 
 # Moscow timezone (UTC+3)
 MOSCOW_TZ = timezone(timedelta(hours=3))
@@ -220,9 +224,7 @@ class DomylandExportService:
             raw_value_text = order.get("customerSummary") or ""
             
             # Extract photo URLs and remove them from valueText
-            photo_urls = PHOTO_URL_PATTERN.findall(raw_value_text)
-            # findall returns tuples with extension, we need full URLs
-            photo_urls = PHOTO_URL_PATTERN.findall(raw_value_text)
+            # Use finditer to get full match objects
             full_photo_urls = [m.group(0) for m in PHOTO_URL_PATTERN.finditer(raw_value_text)]
             
             # Remove photo URLs from text
