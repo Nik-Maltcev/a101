@@ -267,31 +267,22 @@ class DomylandExportService:
                     created_at_str = str(created_at_ts)
             
             # Format orderElements - extract only comments (fields containing "комментарий")
+            # This is the FULL text without truncation (unlike customerSummary which is limited to 1022 chars)
             order_elements_text = ""
+            comments_only = ""
             if order_elements:
                 comments_parts = []
+                comments_only_parts = []
                 for elem in order_elements:
                     q = elem.get("elementTitle", "")
                     a = elem.get("valueTitle", "")
                     # Only include comment fields
                     if q and a and "комментарий" in q.lower():
                         comments_parts.append(f"{q}: {a}")
+                        # For commentsOnly - just the answer without the question
+                        comments_only_parts.append(a)
                 order_elements_text = "; ".join(comments_parts)
-            
-            # Extract only comment text from valueText (after "Оставьте свой комментарий" phrases)
-            # This extracts the actual defect descriptions without form questions
-            comments_only = ""
-            if value_text:
-                # Pattern: "Оставьте свой комментарий...:" followed by text until next question or ";"
-                comment_pattern = re.compile(
-                    r'Оставьте свой комментарий[^:]*:\s*([^;]+)',
-                    re.IGNORECASE
-                )
-                matches = comment_pattern.findall(value_text)
-                if matches:
-                    # Clean up each match and join
-                    cleaned = [m.strip() for m in matches if m.strip()]
-                    comments_only = "; ".join(cleaned)
+                comments_only = "; ".join(comments_only_parts)
             
             row = {
                 "id": order.get("id"),
