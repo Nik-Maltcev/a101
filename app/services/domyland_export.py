@@ -278,6 +278,21 @@ class DomylandExportService:
                         comments_parts.append(f"{q}: {a}")
                 order_elements_text = "; ".join(comments_parts)
             
+            # Extract only comment text from valueText (after "Оставьте свой комментарий" phrases)
+            # This extracts the actual defect descriptions without form questions
+            comments_only = ""
+            if value_text:
+                # Pattern: "Оставьте свой комментарий...:" followed by text until next question or ";"
+                comment_pattern = re.compile(
+                    r'Оставьте свой комментарий[^:]*:\s*([^;]+)',
+                    re.IGNORECASE
+                )
+                matches = comment_pattern.findall(value_text)
+                if matches:
+                    # Clean up each match and join
+                    cleaned = [m.strip() for m in matches if m.strip()]
+                    comments_only = "; ".join(cleaned)
+            
             row = {
                 "id": order.get("id"),
                 "serviceId": order.get("serviceId"),
@@ -291,6 +306,7 @@ class DomylandExportService:
                 "title": order.get("serviceTitle") or "",
                 "valueString": " | ".join(value_strings) if value_strings else "",
                 "valueText": value_text,
+                "commentsOnly": comments_only,
                 "orderElements": order_elements_text,
                 "Фото": photos,
                 "extId": order.get("extId"),
@@ -299,7 +315,7 @@ class DomylandExportService:
             data.append(row)
         
         return self._write_to_excel_ordered(data, output_path, "Orders", 
-            ["id", "serviceId", "serviceInternalTitle", "ФИО", "Телефон", "address", "placeNumber", "placeId", "placeExtId", "title", "valueString", "valueText", "orderElements", "Фото", "extId", "createdAt"])
+            ["id", "serviceId", "serviceInternalTitle", "ФИО", "Телефон", "address", "placeNumber", "placeId", "placeExtId", "title", "valueString", "valueText", "commentsOnly", "orderElements", "Фото", "extId", "createdAt"])
     
     def _write_to_excel_ordered(
         self, 
