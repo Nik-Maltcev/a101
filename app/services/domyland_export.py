@@ -266,6 +266,18 @@ class DomylandExportService:
                 except:
                     created_at_str = str(created_at_ts)
             
+            # Format orderElements - extract only comments (fields containing "комментарий")
+            order_elements_text = ""
+            if order_elements:
+                comments_parts = []
+                for elem in order_elements:
+                    q = elem.get("elementTitle", "")
+                    a = elem.get("valueTitle", "")
+                    # Only include comment fields
+                    if q and a and "комментарий" in q.lower():
+                        comments_parts.append(f"{q}: {a}")
+                order_elements_text = "; ".join(comments_parts)
+            
             row = {
                 "id": order.get("id"),
                 "serviceId": order.get("serviceId"),
@@ -279,6 +291,7 @@ class DomylandExportService:
                 "title": order.get("serviceTitle") or "",
                 "valueString": " | ".join(value_strings) if value_strings else "",
                 "valueText": value_text,
+                "orderElements": order_elements_text,
                 "Фото": photos,
                 "extId": order.get("extId"),
                 "createdAt": created_at_str,
@@ -286,7 +299,7 @@ class DomylandExportService:
             data.append(row)
         
         return self._write_to_excel_ordered(data, output_path, "Orders", 
-            ["id", "serviceId", "serviceInternalTitle", "ФИО", "Телефон", "address", "placeNumber", "placeId", "placeExtId", "title", "valueString", "valueText", "Фото", "extId", "createdAt"])
+            ["id", "serviceId", "serviceInternalTitle", "ФИО", "Телефон", "address", "placeNumber", "placeId", "placeExtId", "title", "valueString", "valueText", "orderElements", "Фото", "extId", "createdAt"])
     
     def _write_to_excel_ordered(
         self, 
