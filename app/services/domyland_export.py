@@ -193,12 +193,37 @@ class DomylandExportService:
                     return merged
                 return order
             
+            async def fetch_order_with_comments(order: dict) -> dict:
+                """Fetch order details and comments."""
+                order_id = order.get("id")
+                if not order_id:
+                    return order
+                
+                # Fetch details
+                enriched = await fetch_order_details(order)
+                
+                # Fetch comments
+                comments = await self.client.get_order_comments(order_id)
+                if comments:
+                    # Extract comment texts
+                    comment_texts = []
+                    for c in comments:
+                        text = c.get("text") or c.get("comment") or c.get("message") or ""
+                        if text:
+                            comment_texts.append(text)
+                    enriched["_order_comments"] = "; ".join(comment_texts)
+                    logger.info(f"Order {order_id}: got {len(comments)} comments, total text: {len(enriched.get('_order_comments', ''))} chars")
+                else:
+                    enriched["_order_comments"] = ""
+                
+                return enriched
+            
             # Process in batches to avoid overwhelming the API
             batch_size = 10
             enriched_data = []
             for i in range(0, len(raw_data), batch_size):
                 batch = raw_data[i:i + batch_size]
-                tasks = [fetch_order_details(order) for order in batch]
+                tasks = [fetch_order_with_comments(order) for order in batch]
                 results = await asyncio.gather(*tasks)
                 enriched_data.extend(results)
                 logger.info(f"Fetched details for orders {i+1}-{min(i+batch_size, len(raw_data))}/{len(raw_data)}")
@@ -298,6 +323,7 @@ class DomylandExportService:
                 "valueString": " | ".join(value_strings) if value_strings else "",
                 "valueText": value_text,
                 "commentsOnly": comments_only,
+                "orderComments": order.get("_order_comments", ""),
                 "orderElements": order_elements_text,
                 "Фото": photos,
                 "extId": order.get("extId"),
@@ -306,7 +332,7 @@ class DomylandExportService:
             data.append(row)
         
         return self._write_to_excel_ordered(data, output_path, "Orders", 
-            ["id", "serviceId", "serviceInternalTitle", "ФИО", "Телефон", "address", "placeNumber", "placeId", "placeExtId", "title", "valueString", "valueText", "commentsOnly", "orderElements", "Фото", "extId", "createdAt"])
+            ["id", "serviceId", "serviceInternalTitle", "ФИО", "Телефон", "address", "placeNumber", "placeId", "placeExtId", "title", "valueString", "valueText", "commentsOnly", "orderComments", "orderElements", "Фото", "extId", "createdAt"])
     
     def _write_to_excel_ordered(
         self, 
