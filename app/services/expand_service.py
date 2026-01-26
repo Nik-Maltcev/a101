@@ -7,9 +7,13 @@ Implements Requirements 4.1, 4.2, 4.3, 4.4:
 - Extracts photo URLs from valueString into "Фото" column
 """
 
+import logging
 import re
 from typing import Optional
 from app.models.schemas import ExpandedRow
+
+
+logger = logging.getLogger(__name__)
 
 
 DEFECT_COLUMN_NAME = "Дефект"
@@ -92,20 +96,33 @@ def expand_rows(
     expanded: list[ExpandedRow] = []
     
     for row, defects in zip(rows, defects_per_row):
-        # If no defects, skip this row (empty comment case)
-        if not defects:
-            continue
-        
         # Extract photo URLs from valueString once per row
         photo_urls = ""
         cleaned_value_string = None
         value_string_key = None
+        value_text_key = None
+        value_text_content = ""
+        
         for key in row.keys():
-            if key.upper() == "VALUESTRING":
+            key_upper = key.upper()
+            if key_upper == "VALUESTRING":
                 value_string_key = key
                 value_string = row.get(key, "") or ""
                 cleaned_value_string, photo_urls = extract_photo_urls(value_string)
-                break
+            elif key_upper == "VALUETEXT":
+                value_text_key = key
+                value_text_content = row.get(key, "") or ""
+        
+        # If no defects found but row has valueText content, use valueText as fallback defect
+        # This prevents losing rows where LLM couldn't parse the defects
+        if not defects:
+            if value_text_content and value_text_content.strip():
+                # Use original valueText as the defect (better than losing the row)
+                defects = [value_text_content.strip()]
+                logger.warning(f"No defects found, using valueText as fallback: '{value_text_content[:100]}...'")
+            else:
+                # Truly empty row - skip it
+                continue
         
         # Create one expanded row per defect
         for defect_text in defects:
