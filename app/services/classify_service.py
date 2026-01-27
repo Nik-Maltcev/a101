@@ -65,31 +65,32 @@ class ClassifyService:
         """Compute hash for a defect string."""
         return hashlib.sha256(defect.encode("utf-8")).hexdigest()
     
-    def _get_from_cache(self, defect: str) -> Optional[str]:
+    def _get_from_cache(self, defect: str) -> Optional[tuple[str, int]]:
         """
-        Get cached category for a defect.
+        Get cached category and confidence for a defect.
         
         Args:
             defect: Defect text
             
         Returns:
-            Cached category string, or None if not cached
+            Cached tuple (category, confidence), or None if not cached
         """
         cache_key = self._compute_hash(defect)
         return self._cache.get(cache_key)
     
-    def _store_in_cache(self, defect: str, category: str) -> None:
+    def _store_in_cache(self, defect: str, category: str, confidence: int) -> None:
         """
         Store result in cache.
         
         Args:
             defect: Original defect text
             category: Assigned category
+            confidence: AI confidence percentage
         """
         cache_key = self._compute_hash(defect)
-        self._cache[cache_key] = category
+        self._cache[cache_key] = (category, confidence)
 
-    def classify_defect(self, defect: str) -> Optional[str]:
+    def classify_defect(self, defect: str) -> Optional[tuple[str, int]]:
         """
         Classify a single defect (sync version, cache lookup only).
         
@@ -100,7 +101,7 @@ class ClassifyService:
             defect: Defect text to classify
             
         Returns:
-            Cached category string, or None if not in cache
+            Cached tuple (category, confidence), or None if not in cache
         """
         if not defect or not defect.strip():
             return None
@@ -114,7 +115,7 @@ class ClassifyService:
         # Return None to indicate need for LLM processing
         return None
     
-    async def classify_defect_async(self, defect: str) -> str:
+    async def classify_defect_async(self, defect: str) -> tuple[str, int]:
         """
         Classify a single defect (async version with LLM call).
         
@@ -122,10 +123,10 @@ class ClassifyService:
             defect: Defect text to classify
             
         Returns:
-            Category string
+            Tuple (category, confidence)
         """
         if not defect or not defect.strip():
-            return "НЕ ОПРЕДЕЛЕНО"
+            return ("НЕ ОПРЕДЕЛЕНО", 0)
         
         # Check cache
         cached = self._get_from_cache(defect)
@@ -135,9 +136,9 @@ class ClassifyService:
         
         # Process via batch (single item)
         results = await self.classify_batch([defect])
-        return results[0] if results else "НЕ ОПРЕДЕЛЕНО"
+        return results[0] if results else ("НЕ ОПРЕДЕЛЕНО", 0)
     
-    async def classify_batch(self, defects: list[str]) -> list[str]:
+    async def classify_batch(self, defects: list[str]) -> list[tuple[str, int]]:
         """
         Classify multiple defects using batch processing.
         
@@ -147,19 +148,19 @@ class ClassifyService:
             defects: List of defect texts to classify
             
         Returns:
-            List of category strings, one per input defect
+            List of tuples (category, confidence), one per input defect
         """
         if not defects:
             return []
         
-        results: list[Optional[str]] = [None] * len(defects)
+        results: list[Optional[tuple[str, int]]] = [None] * len(defects)
         defects_to_process: list[tuple[int, str]] = []
         
         # First pass: handle empty defects and cache hits
         for i, defect in enumerate(defects):
             # Handle empty defects
             if not defect or not defect.strip():
-                results[i] = "НЕ ОПРЕДЕЛЕНО"
+                results[i] = ("НЕ ОПРЕДЕЛЕНО", 0)
                 continue
             
             # Check cache
@@ -213,6 +214,7 @@ class ClassifyService:
                 if i < len(llm_results):
                     classify_result = llm_results[i]
                     category = classify_result.chosen
+                    confidence = classify_result.confidence
                     
                     # Get candidates for this defect
                     candidates = defects_with_candidates[i]["candidates"]
@@ -243,6 +245,7 @@ class ClassifyService:
                             )
                             if best_match and best_match[1] > 30:
                                 category = best_match[0]
+                                confidence = min(best_match[1], 50)  # Lower confidence for fallback
                                 logger.info(f"Selected closest match: '{category}' (score: {best_match[1]})")
                             else:
                                 # Try WRatio as fallback
@@ -253,21 +256,25 @@ class ClassifyService:
                                 )
                                 if best_match and best_match[1] > 30:
                                     category = best_match[0]
+                                    confidence = min(best_match[1], 40)  # Even lower confidence
                                     logger.info(f"Selected WRatio match: '{category}' (score: {best_match[1]})")
                                 else:
                                     # Use first candidate as last resort
                                     category = valid_candidates[0]
+                                    confidence = 20  # Very low confidence
                                     logger.warning(f"Using first candidate as fallback: '{category}'")
                         else:
                             category = "НЕ ОПРЕДЕЛЕНО"
+                            confidence = 0
                             logger.warning(f"No valid candidates for defect {original_idx}")
                 else:
                     # Fallback if LLM returned fewer results
                     category = "НЕ ОПРЕДЕЛЕНО"
+                    confidence = 0
                     logger.warning(f"No LLM result for defect {original_idx}")
                 
-                results[original_idx] = category
-                self._store_in_cache(defect, category)
+                results[original_idx] = (category, confidence)
+                self._store_in_cache(defect, category, confidence)
         
         return results
     

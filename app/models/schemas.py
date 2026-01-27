@@ -54,6 +54,7 @@ class SplitResult(BaseModel):
 class ClassifyResult(BaseModel):
     """Result of classifying a defect."""
     chosen: str  # category name
+    confidence: int = 0  # confidence percentage 0-100
 
 
 class ExpandedRow(BaseModel):
@@ -61,3 +62,4 @@ class ExpandedRow(BaseModel):
     original_data: dict  # all original columns
     defect_text: str
     category: Optional[str] = None
+    confidence: Optional[int] = None  # AI confidence percentage

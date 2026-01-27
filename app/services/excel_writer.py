@@ -27,10 +27,11 @@ class ExcelWriter:
     """Writes classified defect data to Excel files.
     
     Creates output files with all original columns plus the
-    "Категория дефекта" column containing the assigned category.
+    "Категория дефекта" and "Уверенность ИИ" columns.
     """
     
     CATEGORY_COLUMN_NAME = "Категория дефекта"
+    CONFIDENCE_COLUMN_NAME = "Уверенность ИИ"
     
     def write_result(
         self,
@@ -91,7 +92,7 @@ class ExcelWriter:
     ) -> list[str]:
         """Determine the column headers for output file.
         
-        Headers order: original columns + "Дефект" + "Категория дефекта"
+        Headers order: original columns + "Дефект" + "Категория дефекта" + "Уверенность ИИ"
         
         Args:
             rows: List of ExpandedRow objects
@@ -105,10 +106,10 @@ class ExcelWriter:
             headers = list(original_headers)
         elif rows:
             # Extract headers from first row's original_data
-            # Filter out added columns (Дефект, Категория дефекта)
+            # Filter out added columns (Дефект, Категория дефекта, Уверенность ИИ)
             headers = [
                 h for h in rows[0].original_data.keys()
-                if h not in ["Дефект", self.CATEGORY_COLUMN_NAME]
+                if h not in ["Дефект", self.CATEGORY_COLUMN_NAME, self.CONFIDENCE_COLUMN_NAME]
             ]
         else:
             # Empty result
@@ -118,9 +119,13 @@ class ExcelWriter:
         if "Дефект" not in headers:
             headers.append("Дефект")
         
-        # Add category column at the end if not present
+        # Add category column if not present
         if self.CATEGORY_COLUMN_NAME not in headers:
             headers.append(self.CATEGORY_COLUMN_NAME)
+        
+        # Add confidence column at the end if not present
+        if self.CONFIDENCE_COLUMN_NAME not in headers:
+            headers.append(self.CONFIDENCE_COLUMN_NAME)
         
         return headers
     
@@ -155,6 +160,10 @@ class ExcelWriter:
                     value = expanded_row.category or ""
                     if expanded_row.category:
                         categories_written += 1
+                elif header == self.CONFIDENCE_COLUMN_NAME:
+                    # Write confidence as percentage string
+                    confidence = expanded_row.confidence
+                    value = f"{confidence}%" if confidence is not None else ""
                 else:
                     # Write from original_data
                     value = expanded_row.original_data.get(header)

@@ -190,10 +190,11 @@ async def process_job_async(job_id: str, file_path: str) -> None:
         if expanded_rows:
             logger.info(f"Job {job_id}: Classifying {len(expanded_rows)} defects")
             defect_texts = [row.defect_text for row in expanded_rows]
-            categories = await classify_service.classify_batch(defect_texts)
+            classification_results = await classify_service.classify_batch(defect_texts)
             
-            for i, category in enumerate(categories):
+            for i, (category, confidence) in enumerate(classification_results):
                 expanded_rows[i].category = category
+                expanded_rows[i].confidence = confidence
             
             logger.info(f"Job {job_id}: Classification complete")
         
